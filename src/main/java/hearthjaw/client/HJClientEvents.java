@@ -1,6 +1,7 @@
 package hearthjaw.client;
 
 import hearthjaw.HJRegistry;
+import hearthjaw.client.entity.BloominaRenderer;
 import hearthjaw.client.entity.HearthjawModel;
 import hearthjaw.client.entity.HearthjawRenderer;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -16,11 +17,12 @@ public final class HJClientEvents {
 
         @SubscribeEvent
         public static void registerEntityLayerDefinitions(final EntityRenderersEvent.RegisterLayerDefinitions event) {
-            //event.registerLayerDefinition(HearthjawModel.HEARTHJAW_MODEL_RESOURCE, HearthjawModel::createBodyLayer);
+
         }
 
         @SubscribeEvent
         public static void registerEntityRenderers(final EntityRenderersEvent.RegisterRenderers event) {
+            event.registerEntityRenderer(HJRegistry.EntityReg.BLOOMINA.get(), BloominaRenderer::new);
             event.registerEntityRenderer(HJRegistry.EntityReg.HEARTHJAW.get(), HearthjawRenderer::new);
         }
 

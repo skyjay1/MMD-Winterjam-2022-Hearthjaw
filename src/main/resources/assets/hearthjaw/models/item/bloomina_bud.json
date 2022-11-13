@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "hearthjaw:item/hearthgoop"
+    "layer0": "hearthjaw:block/bloomina_bud"
   }
 }

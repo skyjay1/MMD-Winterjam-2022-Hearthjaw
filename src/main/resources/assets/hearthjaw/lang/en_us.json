@@ -1,5 +1,7 @@
 {
+  "entity.hearthjaw.bloomina": "Bloomina",
   "entity.hearthjaw.hearthjaw": "Hearthjaw",
   "block.hearthjaw.hearthgoop": "Hearthgoop",
+  "block.hearthjaw.bloomina_bud": "Bloomina Bud",
   "block.hearthjaw.hearthgoop.tooltip": "Can be eaten to stop freezing"
 }

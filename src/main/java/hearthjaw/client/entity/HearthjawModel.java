@@ -3,6 +3,9 @@ package hearthjaw.client.entity;
 import hearthjaw.HJMain;
 import hearthjaw.entity.Hearthjaw;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class HearthjawModel<T extends Hearthjaw> extends AnimatedGeoModel<T> {
@@ -30,5 +33,19 @@ public class HearthjawModel<T extends Hearthjaw> extends AnimatedGeoModel<T> {
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
         return ANIMATIONS;
+    }
+
+    @Override
+    public void setCustomAnimations(T animatable, int instanceId, AnimationEvent animationEvent) {
+        super.setCustomAnimations(animatable, instanceId, animationEvent);
+        // calculate head rotation
+        final float xRot = -Mth.lerp(animationEvent.getPartialTick(), animatable.xRotO, animatable.getXRot());
+        final float yBodyRot = Mth.rotLerp(animationEvent.getPartialTick(), animatable.yBodyRotO, animatable.yBodyRot);
+        final float yHeadRot = Mth.rotLerp(animationEvent.getPartialTick(), animatable.yHeadRotO, animatable.yHeadRot);
+        final float yRot = -(yHeadRot - yBodyRot);
+        // rotate head bone
+        final IBone head = this.getBone("head");
+        head.setRotationX((float) Math.toRadians(xRot));
+        head.setRotationY((float) Math.toRadians(yRot));
     }
 }

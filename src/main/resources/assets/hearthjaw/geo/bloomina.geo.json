@@ -1,0 +1,95 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.bloomina",
+				"texture_width": 96,
+				"texture_height": 96,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "body",
+					"parent": "root",
+					"pivot": [0, 12, 0],
+					"cubes": [
+						{"origin": [-5, 7, -5], "size": [10, 10, 10], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "arm0",
+					"parent": "body",
+					"pivot": [2, 7, -1],
+					"cubes": [
+						{"origin": [1, 1, -1], "size": [3, 6, 2], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "arm1",
+					"parent": "body",
+					"pivot": [-2, 7, -1],
+					"cubes": [
+						{"origin": [-4, 1, -1], "size": [3, 6, 2], "uv": [0, 0], "mirror": true}
+					]
+				},
+				{
+					"name": "shelltop",
+					"parent": "body",
+					"pivot": [0, 12, 6.25],
+					"rotation": [-5, 0, 0],
+					"cubes": [
+						{"origin": [-6, 8, -6], "size": [12, 10, 12], "inflate": 0.5, "uv": [36, 12]}
+					]
+				},
+				{
+					"name": "wing0",
+					"parent": "shelltop",
+					"pivot": [6.25, 18.25, 0],
+					"cubes": [
+						{"origin": [6.25, 18.25, -4], "size": [8, 0, 8], "uv": [28, 0]}
+					]
+				},
+				{
+					"name": "wing2",
+					"parent": "shelltop",
+					"pivot": [-6.25, 18.25, 0],
+					"cubes": [
+						{"origin": [-14.25, 18.25, -4], "size": [8, 0, 8], "uv": [28, 0], "mirror": true}
+					]
+				},
+				{
+					"name": "wing1",
+					"parent": "shelltop",
+					"pivot": [6.25, 16.25, 1],
+					"cubes": [
+						{"origin": [6.25, 16.25, -2], "size": [6, 0, 6], "uv": [42, 34]}
+					]
+				},
+				{
+					"name": "wing3",
+					"parent": "shelltop",
+					"pivot": [-6.25, 16.25, 1],
+					"cubes": [
+						{"origin": [-12.25, 16.25, -2], "size": [6, 0, 6], "uv": [42, 34], "mirror": true}
+					]
+				},
+				{
+					"name": "shellbottom",
+					"parent": "body",
+					"pivot": [0, 12, 6.25],
+					"rotation": [5, 0, 0],
+					"cubes": [
+						{"origin": [-6, 5.9, -6], "size": [12, 10, 12], "inflate": 0.5, "uv": [0, 24]}
+					]
+				}
+			]
+		}
+	]
+}

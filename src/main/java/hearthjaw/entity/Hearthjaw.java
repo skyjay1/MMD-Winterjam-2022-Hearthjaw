@@ -13,7 +13,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -23,11 +22,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -52,7 +52,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -183,6 +182,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         this.goalSelector.addGoal(5, new Hearthjaw.StartNappingGoal(this, 0.8D));
         this.goalSelector.addGoal(6, new Hearthjaw.PlaceGooGoal(this, 0.9D, 20));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.8D));
+        this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Bloomina.class, 8.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
         // Target goals
@@ -203,6 +203,10 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
     @Override
     public void aiStep() {
         super.aiStep();
+        // update state
+        if(isBiting() && (null == getLastHurtMob() || tickCount - getLastHurtMobTimestamp() > 20)) {
+            setState(STATE_IDLE);
+        }
         // chance to start wanting to nap
         if (!wantsToNap && isIdle() && null == getTarget()) {
             float chance = level.isNight() ? 0.08F : 0.01F;
@@ -293,6 +297,11 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
             setFuel(fuel);
         }
         return super.finalizeSpawn(serverLevel, difficulty, spawnType, spawnDataIn, dataTag);
+    }
+
+    @Override
+    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
+        return dimensions.height;
     }
 
     //// AGEABLE MOB ////
@@ -481,7 +490,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         }
 
         private static boolean isGoo(LevelReader level, BlockState blockState, BlockPos pos) {
-            return blockState.is(HJRegistry.BlockReg.GOO.get());
+            return blockState.is(HJRegistry.BlockReg.HEARTHGOOP.get());
         }
 
         private static boolean isLitCampfire(LevelReader level, BlockState blockState, BlockPos pos) {
@@ -527,7 +536,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
                 if (++this.progress >= maxDuration) {
                     // place goo block
                     if (ForgeEventFactory.getMobGriefingEvent(entity.level, entity)) {
-                        entity.level.setBlock(this.blockPos, HJRegistry.BlockReg.GOO.get().defaultBlockState(), Block.UPDATE_ALL);
+                        entity.level.setBlock(this.blockPos, HJRegistry.BlockReg.HEARTHGOOP.get().defaultBlockState(), Block.UPDATE_ALL);
                     }
                     // play sound and add particles
                     if(entity.level instanceof ServerLevel serverLevel) {
@@ -591,6 +600,14 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
             if(getTicksUntilNextAttack() > 10) {
                 entity.getNavigation().stop();
             } else if(entity.isBiting()) {
+                entity.setState(STATE_IDLE);
+            }
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            if(entity.isBiting()) {
                 entity.setState(STATE_IDLE);
             }
         }

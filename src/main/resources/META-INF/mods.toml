@@ -1,0 +1,23 @@
+modLoader="javafml"
+loaderVersion="[43,)"
+license="GNU LGPLv3"
+
+[[mods]]
+    modId="hearthjaw"
+    version="19.2.0.0"
+    displayName="Hearthjaw"
+    authors="skyjay1"
+    description='''MMD Winterjam 2022'''
+
+[[dependencies.hearthjaw]]
+    modId="forge"
+    mandatory=true
+    versionRange="[43.1.7,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.hearthjaw]]
+    modId="geckolib3"
+    mandatory=true
+    versionRange="[3.1.36,)"
+    ordering="NONE"
+    side="BOTH"

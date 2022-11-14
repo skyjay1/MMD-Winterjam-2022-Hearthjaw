@@ -2,6 +2,7 @@ package hearthjaw;
 
 import hearthjaw.block.BloominaBudBlock;
 import hearthjaw.block.HearthgoopBlock;
+import hearthjaw.block.MovingLightBlock;
 import hearthjaw.entity.Bloomina;
 import hearthjaw.entity.Hearthjaw;
 import hearthjaw.item.HearthgoopItem;
@@ -38,11 +39,15 @@ public final class HJRegistry {
             BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         }
 
-        public static final RegistryObject<Block> BLOOMINA_BUD = BLOCKS.register("bloomina_bud", () ->
+        public static final RegistryObject<BloominaBudBlock> BLOOMINA_BUD = BLOCKS.register("bloomina_bud", () ->
                 new BloominaBudBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().lightLevel(b -> 11)
                         .randomTicks()));
         public static final RegistryObject<Block> HEARTHGOOP = BLOCKS.register("hearthgoop", () ->
                 new HearthgoopBlock(BlockBehaviour.Properties.of(Material.WEB).noCollission().lightLevel(b -> 15)));
+        public static final RegistryObject<Block> LIGHT = BLOCKS.register("light", () ->
+                new MovingLightBlock(BlockBehaviour.Properties.of(Material.AIR)
+                        .strength(-1F).noCollission().randomTicks()
+                        .lightLevel(b -> b.getValue(MovingLightBlock.LEVEL))));
     }
 
     public static final class ItemReg {

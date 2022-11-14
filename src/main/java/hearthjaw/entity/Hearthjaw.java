@@ -49,6 +49,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -71,7 +72,7 @@ import java.util.UUID;
 
 public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
 
-    // SYNCHED DATA //
+    // SYNCED DATA //
     private static final EntityDataAccessor<Byte> DATA_STATE = SynchedEntityData.defineId(Hearthjaw.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> DATA_FUEL = SynchedEntityData.defineId(Hearthjaw.class, EntityDataSerializers.INT);
     private static final String KEY_STATE = "State";
@@ -79,18 +80,20 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
     private static final String KEY_NAPPING_TIME = "Napping";
     private static final String KEY_WANTS_TO_NAP = "WantsToNap";
     // STATES //
-    private static final byte STATE_IDLE = (byte) 0;
-    private static final byte STATE_BITE = (byte) 1;
-    private static final byte STATE_BREATHE = (byte) 2;
-    private static final byte STATE_NAP = (byte) 3;
+    protected static final byte STATE_IDLE = (byte) 0;
+    protected static final byte STATE_BITE = (byte) 1;
+    protected static final byte STATE_BREATHE = (byte) 2;
+    protected static final byte STATE_NAP = (byte) 3;
     // CONSTANTS //
-    private static final int GOO_COST = 200;
+    protected static final int GOO_COST = 200;
+    protected static final int BITE_TIME = 12;
+    protected static final int BREATHE_TIME = 20;
 
     // SERVER SIDE VARIABLES //
-    private boolean isMovingToCold;
-    private boolean isWarm;
-    private int nappingTime;
-    private boolean wantsToNap;
+    protected boolean isMovingToCold;
+    protected boolean isWarm;
+    protected int nappingTime;
+    protected boolean wantsToNap;
 
     // NEUTRAL MOB //
     protected static final UniformInt ANGER_RANGE = TimeUtil.rangeOfSeconds(20, 39);
@@ -98,11 +101,12 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
     protected UUID angerTarget;
 
     // GECKOLIB //
-    private AnimationFactory factory = GeckoLibUtil.createFactory(this);
+    protected AnimationFactory factory = GeckoLibUtil.createFactory(this);
+    protected int animationTimer;
 
     //// CONSTRUCTOR ////
 
-    public Hearthjaw(EntityType<? extends AgeableMob> entityType, Level level) {
+    public Hearthjaw(EntityType<? extends Hearthjaw> entityType, Level level) {
         super(entityType, level);
     }
 
@@ -177,10 +181,10 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         super.registerGoals();
         // Goals
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new Hearthjaw.HearthjawAttackGoal(this, 1.0D, true));
+        this.goalSelector.addGoal(2, new Hearthjaw.HearthjawAttackGoal(this, 1.0D, false));
         this.goalSelector.addGoal(3, new Hearthjaw.NapGoal(this, 1200));
         this.goalSelector.addGoal(5, new Hearthjaw.StartNappingGoal(this, 0.8D));
-        this.goalSelector.addGoal(6, new Hearthjaw.PlaceGooGoal(this, 0.9D, 20));
+        this.goalSelector.addGoal(6, new Hearthjaw.PlaceGooGoal(this, 0.9D, BREATHE_TIME));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.8D));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Bloomina.class, 8.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -203,9 +207,11 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
     @Override
     public void aiStep() {
         super.aiStep();
-        // update state
-        if(isBiting() && (null == getLastHurtMob() || tickCount - getLastHurtMobTimestamp() > 20)) {
-            setState(STATE_IDLE);
+        // update animation time
+        if(animationTimer > 0) {
+            if(--animationTimer <= 0) {
+                setState(STATE_IDLE);
+            }
         }
         // chance to start wanting to nap
         if (!wantsToNap && isIdle() && null == getTarget()) {
@@ -216,7 +222,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         }
         // chance to stop wanting to nap
         if(wantsToNap) {
-            float chance = level.isNight() ? 0.01F : 0.08F;
+            float chance = level.isNight() ? 0.008F : 0.04F;
             if (random.nextFloat() < chance) {
                 wantsToNap = false;
             }
@@ -259,7 +265,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
             player.setItemInHand(hand, itemStack);
             // add particles
             if (level instanceof ServerLevel) {
-                ((ServerLevel) level).sendParticles(ParticleTypes.FLAME, this.getX(), this.getEyeY(), this.getZ(), 12, 0.5D, 0.5D, 0.5D, 0.5D);
+                ((ServerLevel) level).sendParticles(ParticleTypes.FLAME, this.getX(), this.getEyeY(), this.getZ(), 12, 0.5D, 0.5D, 0.5D, 0.0D);
             }
             // DEBUG
             HJMain.LOGGER.debug("consumed item, fuel=" + getFuel() + " and isWarm=" + isWarm());
@@ -285,6 +291,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
     @Override
     public boolean doHurtTarget(Entity target) {
         setState(STATE_BITE);
+        animationTimer = BITE_TIME;
         return super.doHurtTarget(target);
     }
 
@@ -480,12 +487,12 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
 
         @Override
         public double acceptedDistance() {
-            return 4.0D;
+            return 5.0D;
         }
 
         @Override
         protected boolean isValidTarget(LevelReader level, BlockPos pos) {
-            final BlockState blockState = level.getBlockState(pos);
+            final BlockState blockState = level.getBlockState(pos.above());
             return isGoo(level, blockState, pos) || isLitCampfire(level, blockState, pos);
         }
 
@@ -532,6 +539,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
                 // set breathing state
                 if(!entity.isBreathing()) {
                     entity.setState(STATE_BREATHE);
+                    entity.animationTimer = BREATHE_TIME;
                 }
                 if (++this.progress >= maxDuration) {
                     // place goo block
@@ -541,7 +549,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
                     // play sound and add particles
                     if(entity.level instanceof ServerLevel serverLevel) {
                         serverLevel.playSound(null, entity, SoundEvents.FOX_SPIT, entity.getSoundSource(), 1.0F, entity.random.nextFloat() * 0.4F + 0.8F);
-                        serverLevel.sendParticles(ParticleTypes.FLAME, vec.x(), vec.y(), vec.z(), 20, 0.5D, 0.5D, 0.5D, 0.5D);
+                        serverLevel.sendParticles(ParticleTypes.FLAME, vec.x(), vec.y(), vec.z(), 20, 0.5D, 0.5D, 0.5D, 0.0D);
                     }
                     // deplete fuel
                     entity.addFuel(-GOO_COST);
@@ -574,12 +582,18 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
 
         @Override
         protected boolean isValidTarget(LevelReader level, BlockPos pos) {
-            final BlockState blockState = level.getBlockState(pos);
-            final int lightLevel = level.getBrightness(LightLayer.BLOCK, pos);
-            if (lightLevel < 1 && (blockState.isAir() || blockState.getMaterial() == Material.TOP_SNOW)
-                    && level.getBlockState(pos.below()).isFaceSturdy(level, pos, Direction.UP)) {
-                entity.isMovingToCold = true;
-                return true;
+            final int lightLevel = level.getBrightness(LightLayer.BLOCK, pos.above());
+            // ensure valid light level
+            if(lightLevel < 1) {
+                final BlockState blockState = level.getBlockState(pos.above());
+                final BlockState below = level.getBlockState(pos);
+                // ensure valid block position
+                if (!below.is(Blocks.ICE)
+                        && (blockState.isAir() || blockState.getMaterial() == Material.TOP_SNOW)
+                        && below.isFaceSturdy(level, pos, Direction.UP)) {
+                    entity.isMovingToCold = true;
+                    return true;
+                }
             }
             return false;
         }
@@ -597,7 +611,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         @Override
         public void tick() {
             super.tick();
-            if(getTicksUntilNextAttack() > 10) {
+            if(entity.animationTimer > 0) {
                 entity.getNavigation().stop();
             } else if(entity.isBiting()) {
                 entity.setState(STATE_IDLE);

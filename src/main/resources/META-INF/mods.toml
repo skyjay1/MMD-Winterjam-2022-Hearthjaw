@@ -4,7 +4,7 @@ license="GNU LGPLv3"
 
 [[mods]]
     modId="hearthjaw"
-    version="19.2.0.0"
+    version="19.2.0.2"
     displayName="Hearthjaw"
     authors="skyjay1"
     description='''MMD Winterjam 2022'''

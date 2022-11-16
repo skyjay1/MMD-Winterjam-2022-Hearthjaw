@@ -1,0 +1,31 @@
+{
+  "entity.bloomina.ambient": {
+    "sounds": [
+      "hearthjaw:464673__branndybottle__femalegrunt3",
+      "hearthjaw:464674__branndybottle__femalegrunt2"
+    ],
+    "subtitle": "subtitles.entity.bloomina.ambient"
+  },
+  "entity.bloomina.burp": {
+    "sounds": [ "hearthjaw:389463__lzmraul__human-burp" ],
+    "subtitle": "subtitles.entity.bloomina.burp"
+  },
+  "entity.hearthjaw.ambient": {
+    "sounds": [
+      "hearthjaw:377580__yudena__grunt-bymondfisch89",
+      "hearthjaw:554408__fivebrosstopmosyt__alien-grunt-3"
+    ],
+    "subtitle": "subtitles.entity.hearthjaw.ambient"
+  },
+  "entity.hearthjaw.breathe": {
+    "sounds": [ "hearthjaw:50923__rutgermuller__vocal-creepy-krw" ],
+    "subtitle": "subtitles.entity.hearthjaw.breathe"
+  },
+  "entity.hearthjaw.hurt": {
+    "sounds": [
+      "hearthjaw:521951__kastenfrosch__weird-grunt",
+      "hearthjaw:432194__surfaceknight68__single-monster-grunt"
+    ],
+    "subtitle": "subtitles.entity.hearthjaw.hurt"
+  }
+}

@@ -32,6 +32,14 @@ public class HearthgoopBlock extends Block {
     }
 
     @Override
+    public void neighborChanged(BlockState blockState, Level level, BlockPos pos, Block neighbor, BlockPos neighborPos, boolean isMoving) {
+        super.neighborChanged(blockState, level, pos, neighbor, neighborPos, isMoving);
+        if(!canSurvive(blockState, level, pos)) {
+            level.destroyBlock(pos, false);
+        }
+    }
+
+    @Override
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource rand) {
         if (rand.nextInt(6) == 1) {
             double px = (double) blockPos.getX() + rand.nextDouble();

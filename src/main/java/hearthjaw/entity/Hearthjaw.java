@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.TimeUtil;
@@ -112,59 +113,9 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MOVEMENT_SPEED, 0.26F)
+                .add(Attributes.MOVEMENT_SPEED, 0.26D)
                 .add(Attributes.MAX_HEALTH, 30.0D)
                 .add(Attributes.ATTACK_DAMAGE, 5.0D);
-    }
-
-    //// FUEL ////
-
-    public boolean isWarm() {
-        return isWarm;
-    }
-
-    public boolean hasFuel() {
-        return getFuel() > 0;
-    }
-
-    public int getFuel() {
-        return getEntityData().get(DATA_FUEL);
-    }
-
-    public void setFuel(final int amount) {
-        getEntityData().set(DATA_FUEL, amount);
-    }
-
-    public void addFuel(final int amount) {
-        setFuel(Math.max(0, getFuel() + amount));
-    }
-
-    //// STATE ////
-
-    public byte getState() {
-        return getEntityData().get(DATA_STATE);
-    }
-
-    public void setState(final byte state) {
-        // DEBUG
-        HJMain.LOGGER.debug("Set state to " + state);
-        getEntityData().set(DATA_STATE, state);
-    }
-
-    public boolean isNapping() {
-        return getState() == STATE_NAP;
-    }
-
-    public boolean isIdle() {
-        return getState() == STATE_IDLE;
-    }
-
-    public boolean isBiting() {
-        return getState() == STATE_BITE;
-    }
-
-    public boolean isBreathing() {
-        return getState() == STATE_BREATHE;
     }
 
     //// METHODS ////
@@ -209,7 +160,12 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         super.aiStep();
         // update animation time
         if(animationTimer > 0) {
-            if(--animationTimer <= 0) {
+            --animationTimer;
+            if(isBreathing() && animationTimer * 2 == BREATHE_TIME) {
+                // play sound
+                playSound(getBreatheSound(), getSoundVolume() + 0.1F, 0.8F + random.nextFloat() * 0.2F);
+            }
+            if(animationTimer <= 0) {
                 setState(STATE_IDLE);
             }
         }
@@ -250,12 +206,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
             setState(STATE_IDLE);
         }
         ItemStack itemStack = player.getItemInHand(hand);
-        final int burnTime = ForgeHooks.getBurnTime(itemStack, RecipeType.SMELTING);
-        // DEBUG
-        HJMain.LOGGER.debug("item burn time=" + burnTime + " and isWarm=" + isWarm());
-        if (getFuel() < GOO_COST && burnTime > 0) {
-            // add fuel
-            addFuel(burnTime);
+        if(feed(itemStack)) {
             // consume item
             if (itemStack.getCount() > 1) {
                 itemStack.shrink(1);
@@ -263,12 +214,6 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
                 itemStack = itemStack.getCraftingRemainingItem();
             }
             player.setItemInHand(hand, itemStack);
-            // add particles
-            if (level instanceof ServerLevel) {
-                ((ServerLevel) level).sendParticles(ParticleTypes.FLAME, this.getX(), this.getEyeY(), this.getZ(), 12, 0.5D, 0.5D, 0.5D, 0.0D);
-            }
-            // DEBUG
-            HJMain.LOGGER.debug("consumed item, fuel=" + getFuel() + " and isWarm=" + isWarm());
             return InteractionResult.CONSUME;
         }
         return super.mobInteract(player, hand);
@@ -400,8 +345,6 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         wantsToNap = tag.getBoolean(KEY_WANTS_TO_NAP);
         nappingTime = tag.getInt(KEY_NAPPING_TIME);
         isWarm = getFuel() > 0;
-        // DEBUG
-        HJMain.LOGGER.debug("from NBT: fuel=" + getFuel() + ", isWarm=" + isWarm());
     }
 
     @Override
@@ -412,6 +355,86 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         tag.putInt(KEY_FUEL, getFuel());
         tag.putBoolean(KEY_WANTS_TO_NAP, wantsToNap);
         tag.putInt(KEY_NAPPING_TIME, nappingTime);
+    }
+
+    //// SOUNDS ////
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return HJRegistry.SoundReg.HEARTHJAW_AMBIENT.get();
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return HJRegistry.SoundReg.HEARTHJAW_HURT.get();
+    }
+
+    protected SoundEvent getBreatheSound() {
+        return HJRegistry.SoundReg.HEARTHJAW_BREATHE.get();
+    }
+
+    //// FUEL ////
+
+    public boolean isWarm() {
+        return isWarm;
+    }
+
+    public boolean hasFuel() {
+        return getFuel() > 0;
+    }
+
+    public int getFuel() {
+        return getEntityData().get(DATA_FUEL);
+    }
+
+    public void setFuel(final int amount) {
+        getEntityData().set(DATA_FUEL, amount);
+    }
+
+    public void addFuel(final int amount) {
+        setFuel(Math.max(0, getFuel() + amount));
+    }
+
+    public boolean feed(ItemStack itemStack) {
+        final int burnTime = ForgeHooks.getBurnTime(itemStack, RecipeType.SMELTING);
+        if (getFuel() < GOO_COST && burnTime > 0) {
+            // add fuel
+            addFuel(burnTime);
+            // add particles
+            if (level instanceof ServerLevel) {
+                ((ServerLevel) level).sendParticles(ParticleTypes.FLAME, this.getX(), this.getEyeY(), this.getZ(), 12, 0.5D, 0.5D, 0.5D, 0.0D);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    //// STATE ////
+
+    public byte getState() {
+        return getEntityData().get(DATA_STATE);
+    }
+
+    public void setState(final byte state) {
+        getEntityData().set(DATA_STATE, state);
+    }
+
+    public boolean isNapping() {
+        return getState() == STATE_NAP;
+    }
+
+    public boolean isIdle() {
+        return getState() == STATE_IDLE;
+    }
+
+    public boolean isBiting() {
+        return getState() == STATE_BITE;
+    }
+
+    public boolean isBreathing() {
+        return getState() == STATE_BREATHE;
     }
 
     //// GOALS ////
@@ -525,26 +548,26 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         @Override
         public void start() {
             super.start();
-            // DEBUG
-            HJMain.LOGGER.debug("Started PlaceGooGoal");
         }
 
         @Override
         public void tick() {
             if (this.isReachedTarget()) {
                 // stop moving and look at target block
-                Vec3 vec = Vec3.atCenterOf(blockPos);
+                BlockPos pos = blockPos.above();
+                Vec3 vec = Vec3.atCenterOf(pos);
                 entity.getNavigation().stop();
                 entity.getLookControl().setLookAt(vec);
                 // set breathing state
                 if(!entity.isBreathing()) {
                     entity.setState(STATE_BREATHE);
                     entity.animationTimer = BREATHE_TIME;
+                    this.getFlags().add(Goal.Flag.LOOK);
                 }
                 if (++this.progress >= maxDuration) {
                     // place goo block
                     if (ForgeEventFactory.getMobGriefingEvent(entity.level, entity)) {
-                        entity.level.setBlock(this.blockPos, HJRegistry.BlockReg.HEARTHGOOP.get().defaultBlockState(), Block.UPDATE_ALL);
+                        entity.level.setBlock(pos, HJRegistry.BlockReg.HEARTHGOOP.get().defaultBlockState(), Block.UPDATE_ALL);
                     }
                     // play sound and add particles
                     if(entity.level instanceof ServerLevel serverLevel) {
@@ -573,6 +596,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
             if(entity.isBreathing()) {
                 entity.setState(STATE_IDLE);
             }
+            this.getFlags().remove(Goal.Flag.LOOK);
         }
 
         @Override

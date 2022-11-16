@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:fishing_rod" },
+    { "item": "hearthjaw:bloomlight" }
+  ],
+  "result": {
+    "item": "hearthjaw:bloomlight_rod",
+    "count": 1
+  }
+}

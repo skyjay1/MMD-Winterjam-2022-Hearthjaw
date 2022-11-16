@@ -46,6 +46,7 @@ public class BloominaBudBlock extends FlowerBlock implements BonemealableBlock {
         // spawn bloomina
         Bloomina bloomina = HJRegistry.EntityReg.BLOOMINA.get().create(level);
         bloomina.setPos(Vec3.atCenterOf(pos));
+        bloomina.setBaby(true);
         level.addFreshEntityWithPassengers(bloomina);
         bloomina.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.BREEDING, null, null);
     }

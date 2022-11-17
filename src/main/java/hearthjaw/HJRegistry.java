@@ -3,6 +3,7 @@ package hearthjaw;
 import hearthjaw.block.BloominaBudBlock;
 import hearthjaw.block.BloomLanternBlock;
 import hearthjaw.block.HearthgoopBlock;
+import hearthjaw.block.IglooTestBlock;
 import hearthjaw.block.MovingLightBlock;
 import hearthjaw.entity.Bloomina;
 import hearthjaw.entity.Hearthjaw;
@@ -68,6 +69,10 @@ public final class HJRegistry {
                 new MovingLightBlock(BlockBehaviour.Properties.of(Material.AIR)
                         .strength(-1F).noCollission().randomTicks()
                         .lightLevel(b -> b.getValue(MovingLightBlock.LEVEL))));
+
+        public static final RegistryObject<Block> IGLOO_TEST = BLOCKS.register("igloo_test", () ->
+                new IglooTestBlock(BlockBehaviour.Properties.of(Material.STONE)));
+
     }
 
     public static final class ItemReg {
@@ -86,6 +91,11 @@ public final class HJRegistry {
                 new Item(new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> HEARTHGOOP = ITEMS.register("hearthgoop", () ->
                 new HearthgoopItem(BlockReg.HEARTHGOOP.get(), new Item.Properties().tab(HJ_TAB)));
+
+
+
+        public static final RegistryObject<Item> IGLOO_TEST = ITEMS.register("igloo_test", () ->
+                new BlockItem(BlockReg.IGLOO_TEST.get(), new Item.Properties().tab(HJ_TAB)));
     }
 
     public static final class EntityReg {

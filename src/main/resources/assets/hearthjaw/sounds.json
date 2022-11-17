@@ -10,6 +10,14 @@
     "sounds": [ "hearthjaw:389463__lzmraul__human-burp" ],
     "subtitle": "subtitles.entity.bloomina.burp"
   },
+  "entity.bloomina.hurt": {
+    "sounds": [ "hearthjaw:203976__thatbennyguy__female-hurt" ],
+    "subtitle": "subtitles.entity.bloomina.hurt"
+  },
+  "entity.bloomina.scared": {
+    "sounds": [ "hearthjaw:445119__breviceps__animal-cartoon-cooing-curr-parrot" ],
+    "subtitle": "subtitles.entity.bloomina.scared"
+  },
   "entity.hearthjaw.ambient": {
     "sounds": [
       "hearthjaw:377580__yudena__grunt-bymondfisch89",

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "hearthjaw:block/bloom_lantern"
+    },
+    "hanging=true": {
+      "model": "hearthjaw:block/hanging_bloom_lantern"
+    }
+  }
+}

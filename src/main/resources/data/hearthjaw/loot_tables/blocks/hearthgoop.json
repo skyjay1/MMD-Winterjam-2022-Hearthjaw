@@ -9,14 +9,7 @@
           "name": "hearthjaw:hearthgoop",
           "conditions": [
             {
-              "condition": "minecraft:match_tool",
-              "predicate": {
-                "enchantments": [
-                  {
-                    "enchantment": "minecraft:silk_touch"
-                  }
-                ]
-              }
+              "condition": "minecraft:survives_explosion"
             }
           ]
         }

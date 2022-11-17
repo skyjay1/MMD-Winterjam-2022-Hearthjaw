@@ -28,13 +28,11 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -107,7 +105,7 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
     protected static final int START_HIDE_TIME = 40;
     protected static final int MIN_HIDING_TIME = 90 + START_HIDE_TIME;
     protected static final int MIN_COOKING_TIME = 180;
-    protected static final Predicate<LivingEntity> DO_FOLLOW_PLAYER = e -> e.getMainHandItem().is(HJRegistry.ItemReg.BLOOMLIGHT_ROD.get()) || e.getOffhandItem().is(HJRegistry.ItemReg.BLOOMLIGHT_ROD.get());
+    protected static final Predicate<LivingEntity> DO_FOLLOW_PLAYER = e -> e.getMainHandItem().is(HJRegistry.ItemReg.BLOOMLIGHT_ON_A_STICK.get()) || e.getOffhandItem().is(HJRegistry.ItemReg.BLOOMLIGHT_ON_A_STICK.get());
 
     // SERVER SIDE VARIABLES //
     protected boolean isFertile;
@@ -186,12 +184,15 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
             --burpingTimer;
             if(burpingTimer == BURP_TIME - 4) {
                 // play sound
-                this.playSound(getBurpSound(), getSoundVolume() + 0.2F, 1.1F + random.nextFloat() * 0.4F);
+                this.playSound(getBurpSound(), getSoundVolume() + 0.2F, getVoicePitch() + 0.25F);
             }
         }
         // update hiding animation
         if(startHidingTimer > 0) {
             --startHidingTimer;
+            if(startHidingTimer == START_HIDE_TIME - 1) {
+                this.playSound(getScaredSound(), getSoundVolume(), getVoicePitch());
+            }
         }
         // update cooking time
         if(cookingTimeLeft > 0 && level instanceof ServerLevel serverLevel) {
@@ -235,8 +236,6 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
         super.actuallyHurt(source, amount);
         // update state
         scare();
-        int hidingTime = MIN_HIDING_TIME + random.nextInt(MIN_HIDING_TIME);
-        hidingTimeLeft = Math.max(hidingTimeLeft, hidingTime);
         // alert nearby hearthjaws
         if(source.getEntity() instanceof LivingEntity sourceEntity) {
             List<Hearthjaw> list = level.getEntitiesOfClass(Hearthjaw.class, getBoundingBox().inflate(10.0D));
@@ -376,7 +375,7 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
     }
 
     public int getLightLevel() {
-        return isBaby() ? 8 : 12;
+        return isBaby() ? 10 : 12;
     }
 
     //// SOUNDS ////
@@ -389,7 +388,7 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
 
     @Override
     public int getAmbientSoundInterval() {
-        return isHiding() ? 400 : 200;
+        return isHiding() ? 450 : 250;
     }
 
     @Override
@@ -397,8 +396,18 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
         return 0.8F;
     }
 
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return random.nextInt(3) == 0 ? HJRegistry.SoundReg.BLOOMINA_HURT.get() : super.getHurtSound(source);
+    }
+
     protected SoundEvent getBurpSound() {
         return HJRegistry.SoundReg.BLOOMINA_BURP.get();
+    }
+
+    protected SoundEvent getScaredSound() {
+        return random.nextFloat() < 0.4F ? HJRegistry.SoundReg.BLOOMINA_SCARED.get() : HJRegistry.SoundReg.BLOOMINA_HURT.get();
     }
 
     //// STATE ////
@@ -427,6 +436,8 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
                 level.broadcastEntityEvent(this, START_HIDING_EVENT);
             }
         }
+        int hidingTime = MIN_HIDING_TIME + random.nextInt(MIN_HIDING_TIME);
+        hidingTimeLeft = Math.max(hidingTimeLeft, hidingTime);
     }
 
     @Override
@@ -698,6 +709,16 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
                 ((ServerLevel)entity.level).sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 6, 0.45D, 0.45D, 0.45D, 0.0D);
             }
             super.tick();
+        }
+
+        @Override
+        public double acceptedDistance() {
+            return 2.0D;
+        }
+
+        @Override
+        protected BlockPos getMoveToTarget() {
+            return blockPos;
         }
 
         @Override

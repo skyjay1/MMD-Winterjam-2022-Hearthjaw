@@ -1,7 +1,7 @@
 package hearthjaw;
 
 import hearthjaw.block.BloominaBudBlock;
-import hearthjaw.block.BloomlightLanternBlock;
+import hearthjaw.block.BloomLanternBlock;
 import hearthjaw.block.HearthgoopBlock;
 import hearthjaw.block.MovingLightBlock;
 import hearthjaw.entity.Bloomina;
@@ -57,8 +57,8 @@ public final class HJRegistry {
                 new BloominaBudBlock(BlockBehaviour.Properties.of(Material.PLANT)
                         .noCollission().lightLevel(b -> 11).randomTicks()
                         .sound(SoundType.CROP)));
-        public static final RegistryObject<Block> BLOOMLIGHT_LANTERN = BLOCKS.register("bloomlight_lantern", () ->
-                new BloomlightLanternBlock(BlockBehaviour.Properties.of(Material.WOOD)
+        public static final RegistryObject<Block> BLOOM_LANTERN = BLOCKS.register("bloom_lantern", () ->
+                new BloomLanternBlock(BlockBehaviour.Properties.of(Material.WOOD)
                         .strength(3.5F).sound(SoundType.LANTERN).lightLevel(b -> 15).noOcclusion()));
         public static final RegistryObject<Block> HEARTHGOOP = BLOCKS.register("hearthgoop", () ->
                 new HearthgoopBlock(BlockBehaviour.Properties.of(Material.WEB)
@@ -80,9 +80,9 @@ public final class HJRegistry {
                 new BlockItem(BlockReg.BLOOMINA_BUD.get(), new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> BLOOMLIGHT = ITEMS.register("bloomlight", () ->
                 new Item(new Item.Properties().tab(HJ_TAB)));
-        public static final RegistryObject<Item> BLOOMINA_LANTERN = ITEMS.register("bloomlight_lantern", () ->
-                new BlockItem(BlockReg.BLOOMLIGHT_LANTERN.get(), new Item.Properties().tab(HJ_TAB)));
-        public static final RegistryObject<Item> BLOOMLIGHT_ROD = ITEMS.register("bloomlight_rod", () ->
+        public static final RegistryObject<Item> BLOOM_LANTERN = ITEMS.register("bloom_lantern", () ->
+                new BlockItem(BlockReg.BLOOM_LANTERN.get(), new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> BLOOMLIGHT_ON_A_STICK = ITEMS.register("bloomlight_on_a_stick", () ->
                 new Item(new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> HEARTHGOOP = ITEMS.register("hearthgoop", () ->
                 new HearthgoopItem(BlockReg.HEARTHGOOP.get(), new Item.Properties().tab(HJ_TAB)));
@@ -124,6 +124,8 @@ public final class HJRegistry {
 
         public static final RegistryObject<SoundEvent> BLOOMINA_AMBIENT = register("entity.bloomina.ambient");
         public static final RegistryObject<SoundEvent> BLOOMINA_BURP = register("entity.bloomina.burp");
+        public static final RegistryObject<SoundEvent> BLOOMINA_HURT = register("entity.bloomina.hurt");
+        public static final RegistryObject<SoundEvent> BLOOMINA_SCARED = register("entity.bloomina.scared");
         public static final RegistryObject<SoundEvent> HEARTHJAW_AMBIENT = register("entity.hearthjaw.ambient");
         public static final RegistryObject<SoundEvent> HEARTHJAW_BREATHE = register("entity.hearthjaw.breathe");
         public static final RegistryObject<SoundEvent> HEARTHJAW_HURT = register("entity.hearthjaw.hurt");

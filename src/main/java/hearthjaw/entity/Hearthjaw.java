@@ -171,7 +171,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         }
         // chance to start wanting to nap
         if (!wantsToNap && isIdle() && null == getTarget()) {
-            float chance = level.isNight() ? 0.08F : 0.01F;
+            float chance = level.isNight() ? 0.04F : 0.01F;
             if (random.nextFloat() < chance) {
                 wantsToNap = true;
             }

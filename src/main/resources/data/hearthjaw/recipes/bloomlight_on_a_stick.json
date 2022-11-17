@@ -1,12 +1,11 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    { "item": "minecraft:chain" },
-    { "item": "minecraft:glass_bottle" },
+    { "item": "minecraft:fishing_rod" },
     { "item": "hearthjaw:bloomlight" }
   ],
   "result": {
-    "item": "hearthjaw:bloomlight_lantern",
+    "item": "hearthjaw:bloomlight_on_a_stick",
     "count": 1
   }
 }

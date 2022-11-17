@@ -1,6 +1,7 @@
 package hearthjaw;
 
 import hearthjaw.entity.Bloomina;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -17,18 +18,21 @@ public final class HJEvents {
 
         @SubscribeEvent
         public static void onEntityJoinLevel(final EntityJoinLevelEvent event) {
+            if(event.getEntity().level.isClientSide()) {
+                return;
+            }
             // modify goals
             if(event.getEntity() instanceof PathfinderMob mob) {
                 // illager and undead attack bloomina
                 if(mob.getMobType() == MobType.ILLAGER || mob.getMobType() == MobType.UNDEAD) {
-                    mob.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(mob, Bloomina.class, 10, true, true,
+                    mob.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(mob, Bloomina.class, 15, true, true,
                             e -> (e instanceof Bloomina bloomina && !bloomina.isHiding())));
                 }
             }
             // lightning strike
             if(event.getEntity() instanceof LightningBolt bolt) {
                 // locate nearby bloominas
-                AABB aabb = new AABB(bolt.blockPosition()).inflate(48.0D, 16.0D, 48.0D);
+                AABB aabb = new AABB(new BlockPos(bolt.position())).inflate(48.0D, 16.0D, 48.0D);
                 List<Bloomina> list = bolt.level.getEntitiesOfClass(Bloomina.class, aabb);
                 // scare each bloomina
                 list.forEach(bloomina -> bloomina.scare());

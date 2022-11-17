@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "hearthjaw:bloomlight_lantern",
+          "name": "hearthjaw:bloom_lantern",
           "conditions": [
             {
               "condition": "minecraft:survives_explosion"

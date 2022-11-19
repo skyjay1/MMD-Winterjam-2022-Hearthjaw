@@ -1,5 +1,6 @@
 package hearthjaw.util;
 
+import hearthjaw.HJRegistry;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -8,9 +9,9 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.NonNullLazy;
@@ -18,27 +19,30 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
-public class HemisphereBuilder implements INBTSerializable<CompoundTag> {
+public class IglooBuilder implements INBTSerializable<CompoundTag> {
+
+    public static final IglooBuilder EMPTY = new IglooBuilder(BlockPos.ZERO, 0, 0);
 
     protected BlockPos center;
     protected int width;
     protected int maxDepth;
-    protected int increment;
 
     protected final NonNullLazy<List<BlockPos>> positions = NonNullLazy.of(this::calculate);
 
-    public HemisphereBuilder(BlockPos center, int width, int maxDepth, int increment) {
+    public IglooBuilder(BlockPos center, int width, int maxDepth) {
         this.center = center.immutable();
         this.width = width;
         this.maxDepth = Math.abs(maxDepth);
-        this.increment = increment;
     }
 
-    public List<BlockPos> getPositions() {
-        return positions.get();
+    public IglooBuilder(final CompoundTag tag) {
+        deserializeNBT(tag);
     }
+
+    //// METHODS ////
 
     /**
      * @param level the level
@@ -60,33 +64,33 @@ public class HemisphereBuilder implements INBTSerializable<CompoundTag> {
 
     /**
      * Determines the building block to place at the given position.
-     * Returns increased layer snow for existing snow layers,
-     * single layer snow for supported positions, and packed ice for semi-supported positions
+     * Returns full snow brick blocks for half snow bricks, and
+     * half snow bricks for supported and semi-supported positions
      * @param level the level
      * @param pos the position to be replaced with a building block
      * @return the building block if possible, or an empty optional
      */
     public Optional<BlockState> getBuildingBlock(final LevelReader level, final BlockPos pos) {
-        // check for existing snow layer
+        // check for existing snow bricks
         BlockState blockState = level.getBlockState(pos);
-        if(blockState.is(Blocks.SNOW)) {
-            int layers = increment + blockState.getValue(SnowLayerBlock.LAYERS);
-            if(layers >= 8) {
-                return Optional.of(Blocks.SNOW_BLOCK.defaultBlockState());
+        if(blockState.is(HJRegistry.BlockReg.SNOW_BRICKS.get())) {
+            switch (blockState.getValue(SlabBlock.TYPE)) {
+                case TOP:
+                case BOTTOM:
+                    return Optional.of(blockState.setValue(SlabBlock.TYPE, SlabType.DOUBLE));
+                case DOUBLE: default:
+                    return Optional.empty();
             }
-            return Optional.of(Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, layers));
-        }
-        // check for vertical support
-        BlockPos below = pos.below();
-        if(level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) {
-            return Optional.of(Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, 1));
         }
         // check for horizontal support
         BlockPos relative;
-        for(Direction direction : Direction.Plane.HORIZONTAL) {
+        for(Direction direction : Direction.values()) {
+            if(direction == Direction.UP) {
+                continue;
+            }
             relative = pos.relative(direction);
             if(level.getBlockState(relative).isFaceSturdy(level, relative, direction.getOpposite())) {
-                return Optional.of(Blocks.BLUE_ICE.defaultBlockState());
+                return Optional.of(HJRegistry.BlockReg.SNOW_BRICKS.get().defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
             }
         }
         // no checks passed
@@ -105,8 +109,8 @@ public class HemisphereBuilder implements INBTSerializable<CompoundTag> {
             return true;
         }
         // check for unfinished snow block
-        if(blockState.is(Blocks.SNOW)) {
-            return blockState.getValue(SnowLayerBlock.LAYERS) < 8;
+        if(blockState.is(HJRegistry.BlockReg.SNOW_BRICKS.get())) {
+            return blockState.getValue(SlabBlock.TYPE) != SlabType.DOUBLE;
         }
         // check for replaceable material
         if(blockState.getMaterial().isReplaceable()) {
@@ -133,6 +137,10 @@ public class HemisphereBuilder implements INBTSerializable<CompoundTag> {
                     if(x == 0 && z == 0) {
                         continue;
                     }
+                    // do not cover the bottom middle blocks on north and south
+                    if(y > -2 && y < 2 && x < 1) {
+                        continue;
+                    }
                     // check if the given position is at the edge of a sphere
                     test = center.add(x, Math.max(0, y), z);
                     if(center.closerThan(test, radius + margin) && !center.closerThan(test, radius - margin)) {
@@ -149,12 +157,29 @@ public class HemisphereBuilder implements INBTSerializable<CompoundTag> {
         return list;
     }
 
+    //// GETTERS ////
+
+    public List<BlockPos> getPositions() {
+        return positions.get();
+    }
+
+    public BlockPos getCenter() {
+        return center;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+
     //// NBT ////
 
     private static final String KEY_CENTER = "Center";
     private static final String KEY_WIDTH = "Width";
     private static final String KEY_MAX_DEPTH = "MaxDepth";
-    private static final String KEY_INCREMENT = "Increment";
 
     @Override
     public CompoundTag serializeNBT() {
@@ -162,7 +187,6 @@ public class HemisphereBuilder implements INBTSerializable<CompoundTag> {
         tag.put(KEY_CENTER, NbtUtils.writeBlockPos(center));
         tag.putInt(KEY_WIDTH, width);
         tag.putInt(KEY_MAX_DEPTH, maxDepth);
-        tag.putInt(KEY_INCREMENT, increment);
         return tag;
     }
 
@@ -171,6 +195,31 @@ public class HemisphereBuilder implements INBTSerializable<CompoundTag> {
         center = NbtUtils.readBlockPos(tag.getCompound(KEY_CENTER));
         width = tag.getInt(KEY_WIDTH);
         maxDepth = tag.getInt(KEY_MAX_DEPTH);
-        increment = tag.getInt(KEY_INCREMENT);
+    }
+
+    //// EQUALITY ////
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof IglooBuilder)) return false;
+        IglooBuilder that = (IglooBuilder) o;
+        return width == that.width && maxDepth == that.maxDepth && Objects.equals(center, that.center);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(center, width, maxDepth);
+    }
+
+    //// OTHER ////
+
+
+    @Override
+    public String toString() {
+        return "IglooBuilder{"
+                + " center=" + center.toShortString()
+                + " width=" + width
+                + " }";
     }
 }

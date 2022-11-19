@@ -3,10 +3,11 @@ package hearthjaw;
 import hearthjaw.block.BloominaBudBlock;
 import hearthjaw.block.BloomLanternBlock;
 import hearthjaw.block.HearthgoopBlock;
-import hearthjaw.block.IglooTestBlock;
 import hearthjaw.block.MovingLightBlock;
 import hearthjaw.entity.Bloomina;
 import hearthjaw.entity.Hearthjaw;
+import hearthjaw.entity.Rimeite;
+import hearthjaw.entity.RimeiteQueen;
 import hearthjaw.item.HearthgoopItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
@@ -69,9 +71,9 @@ public final class HJRegistry {
                 new MovingLightBlock(BlockBehaviour.Properties.of(Material.AIR)
                         .strength(-1F).noCollission().randomTicks()
                         .lightLevel(b -> b.getValue(MovingLightBlock.LEVEL))));
-
-        public static final RegistryObject<Block> IGLOO_TEST = BLOCKS.register("igloo_test", () ->
-                new IglooTestBlock(BlockBehaviour.Properties.of(Material.STONE)));
+        public static final RegistryObject<Block> SNOW_BRICKS = BLOCKS.register("snow_bricks", () ->
+                new SlabBlock(BlockBehaviour.Properties.of(Material.ICE_SOLID)
+                        .strength(1.5F, 6.0F)));
 
     }
 
@@ -91,11 +93,8 @@ public final class HJRegistry {
                 new Item(new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> HEARTHGOOP = ITEMS.register("hearthgoop", () ->
                 new HearthgoopItem(BlockReg.HEARTHGOOP.get(), new Item.Properties().tab(HJ_TAB)));
-
-
-
-        public static final RegistryObject<Item> IGLOO_TEST = ITEMS.register("igloo_test", () ->
-                new BlockItem(BlockReg.IGLOO_TEST.get(), new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> SNOW_BRICKS = ITEMS.register("snow_bricks", () ->
+                new BlockItem(BlockReg.SNOW_BRICKS.get(), new Item.Properties().tab(HJ_TAB)));
     }
 
     public static final class EntityReg {
@@ -108,6 +107,8 @@ public final class HJRegistry {
         private static void onRegisterAttributes(final EntityAttributeCreationEvent event) {
             event.put(BLOOMINA.get(), Bloomina.createAttributes().build());
             event.put(HEARTHJAW.get(), Hearthjaw.createAttributes().build());
+            event.put(RIMEITE_QUEEN.get(), RimeiteQueen.createAttributes().build());
+            event.put(RIMEITE.get(), Rimeite.createAttributes().build());
         }
 
         public static final RegistryObject<EntityType<Bloomina>> BLOOMINA = ENTITY_TYPES.register("bloomina", () ->
@@ -120,6 +121,16 @@ public final class HJRegistry {
                         .sized(1.39F, 1.125F)
                         .fireImmune()
                         .build("hearthjaw"));
+
+        public static final RegistryObject<EntityType<RimeiteQueen>> RIMEITE_QUEEN = ENTITY_TYPES.register("rimeite_queen", () ->
+                EntityType.Builder.of(RimeiteQueen::new, MobCategory.CREATURE)
+                        .sized(0.98F, 1.25F)
+                        .build("rimeite_queen"));
+
+        public static final RegistryObject<EntityType<Rimeite>> RIMEITE = ENTITY_TYPES.register("rimeite", () ->
+                EntityType.Builder.of(Rimeite::new, MobCategory.CREATURE)
+                        .sized(0.5F, 0.5F)
+                        .build("rimeite"));
     }
 
     public static final class SoundReg {

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "hearthjaw:block/snow_bricks",
+    "top": "hearthjaw:block/snow_bricks",
+    "side": "hearthjaw:block/snow_bricks"
+  }
+}

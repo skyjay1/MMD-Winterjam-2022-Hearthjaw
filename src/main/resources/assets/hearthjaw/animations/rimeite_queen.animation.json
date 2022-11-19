@@ -1,0 +1,183 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.rimeite_queen.idle": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"body": {
+					"rotation": {
+						"vector": ["math.sin(-72+query.anim_time*90)*1", 0, 0]
+					}
+				},
+				"mouth": {
+					"rotation": {
+						"vector": ["math.sin(query.anim_time*90)*2", 0, 0]
+					},
+					"scale": {
+						"vector": ["0.95+math.sin(query.anim_time*90)*0.05", 1, "1+math.sin(query.anim_time*90)*0.1"]
+					}
+				},
+				"bucket": {
+					"rotation": {
+						"vector": ["math.sin(-72+query.anim_time*90)*2", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.rimeite_queen.snow_1": {
+			"loop": true,
+			"bones": {
+				"snow": {
+					"position": {
+						"vector": [0, -3, 0]
+					}
+				}
+			}
+		},
+		"animation.rimeite_queen.snow_2": {
+			"loop": true,
+			"bones": {
+				"snow": {
+					"position": {
+						"vector": [0, -6, 0]
+					}
+				}
+			}
+		},
+		"animation.rimeite_queen.snow_3": {
+			"loop": true,
+			"bones": {
+				"snow": {
+					"position": {
+						"vector": [0, -9, 0]
+					}
+				}
+			}
+		},
+		"animation.rimeite_queen.snow_empty": {
+			"loop": true,
+			"bones": {
+				"snow": {
+					"position": {
+						"vector": [0, -9, 0]
+					},
+					"scale": {
+						"vector": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.rimeite_queen.brick": {
+			"animation_length": 2,
+			"bones": {
+				"mouth": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.5": {
+							"vector": [5, 0, 0],
+							"easing": "easeInOutSine"
+						},
+						"2.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"bucket": {
+					"rotation": {
+						"vector": ["math.sin(-72+query.anim_time*90)*2", 0, 0]
+					}
+				},
+				"snow": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.6": {
+							"vector": [0, -3, 0],
+							"easing": "easeInOutSine"
+						}
+					}
+				},
+				"brick": {
+					"rotation": {
+						"1.7": {
+							"vector": [0, 0, 0]
+						},
+						"2.0": {
+							"vector": [0, 0, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.0": {
+							"vector": [0, 4, -0.5]
+						},
+						"1.3": {
+							"vector": [0, 5, -4]
+						},
+						"1.7": {
+							"vector": [0, 5, -13],
+							"easing": "easeInSine"
+						},
+						"2.0": {
+							"vector": [0, -1, -13],
+							"easing": "easeInBounce",
+							"easingArgs": [0.25]
+						}
+					}
+				},
+				"mouth_spit": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.5": {
+							"vector": [5, 0, 0],
+							"easing": "easeInOutSine"
+						},
+						"2.0": {
+							"vector": [0, 0, 0],
+							"easing": "easeInOutSine"
+						}
+					},
+					"scale": {
+						"0.0": {
+							"vector": [1, 1, 1]
+						},
+						"1.5": {
+							"vector": [0.2, 1.25, 1],
+							"easing": "easeInBack"
+						},
+						"1.72": {
+							"vector": [0.2, 1.25, 1],
+							"easing": "easeInBack"
+						},
+						"2.0": {
+							"vector": [1, 1, 1],
+							"easing": "easeInOutSine"
+						}
+					}
+				}
+			}
+		},
+		"animation.rimeite_queen.brick_out": {
+			"loop": true,
+			"animation_length": 0.1,
+			"bones": {
+				"brick": {
+					"position": {
+						"vector": [0, -1, -13],
+						"easing": "easeInBounce",
+						"easingArgs": [0.25]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

@@ -25,6 +25,40 @@
 				}
 			}
 		},
+		"animation.rimeite_queen.idle_brick_out": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"body": {
+					"rotation": {
+						"vector": ["math.sin(-72+query.anim_time*90)*1", 0, 0]
+					}
+				},
+				"bucket": {
+					"rotation": {
+						"vector": ["math.sin(-72+query.anim_time*90)*2", 0, 0]
+					}
+				},
+				"brick": {
+					"rotation": {
+						"vector": ["math.sin(-72+query.anim_time*90)*-1", 0, 0]
+					},
+					"position": {
+						"vector": [0, "-1+math.sin(-72+query.anim_time*90)*0.15", -13],
+						"easing": "easeInBounce",
+						"easingArgs": [0.25]
+					}
+				},
+				"mouth_spit": {
+					"rotation": {
+						"vector": ["math.sin(query.anim_time*90)*2", 0, 0]
+					},
+					"scale": {
+						"vector": ["0.95+math.sin(query.anim_time*90)*0.05", 1, "1+math.sin(query.anim_time*90)*0.1"]
+					}
+				}
+			}
+		},
 		"animation.rimeite_queen.snow_1": {
 			"loop": true,
 			"bones": {

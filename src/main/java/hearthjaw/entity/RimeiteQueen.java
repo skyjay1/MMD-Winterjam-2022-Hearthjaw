@@ -72,12 +72,10 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
 
     // SYNCED DATA //
     private static final EntityDataAccessor<Byte> DATA_STATE = SynchedEntityData.defineId(RimeiteQueen.class, EntityDataSerializers.BYTE);
-    private static final EntityDataAccessor<Integer> DATA_OLD_SNOW = SynchedEntityData.defineId(RimeiteQueen.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_SNOW = SynchedEntityData.defineId(RimeiteQueen.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_BRICK = SynchedEntityData.defineId(RimeiteQueen.class, EntityDataSerializers.BOOLEAN);
     private static final String KEY_STATE = "State";
     private static final String KEY_POWER = "Power";
-    private static final String KEY_OLD_SNOW = "OldSnow";
     private static final String KEY_SNOW = "Snow";
     private static final String KEY_BRICK = "HasBrick";
     private static final String KEY_BRICK_TIME = "BrickTime";
@@ -120,6 +118,7 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     // GECKOLIB //
     protected AnimationFactory factory = GeckoLibUtil.createFactory(this);
     protected int brickTimer;
+    protected int snowO;
 
     //// CONSTRUCTOR ////
 
@@ -160,7 +159,6 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     protected void defineSynchedData() {
         super.defineSynchedData();
         getEntityData().define(DATA_STATE, (byte) 0);
-        getEntityData().define(DATA_OLD_SNOW, 0);
         getEntityData().define(DATA_SNOW, 0);
         getEntityData().define(DATA_BRICK, false);
     }
@@ -180,6 +178,11 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     public void aiStep() {
         super.aiStep();
         if(!level.isClientSide()) {
+            // take damage in warm biomes
+            Biome biome = level.getBiome(blockPosition()).value();
+            if(biome.shouldSnowGolemBurn(blockPosition())) {
+                hurt(DamageSource.ON_FIRE, 1.0F);
+            }
             // update igloo builder based on conditions
             if(tickCount % 25 == 1) {
                 checkAndUpdateIglooBuilder();
@@ -190,8 +193,10 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
             }
             // capture snow
             captureSnow();
-            // update old snow
-            updateOldSnow();
+            // rarely destroy held brick
+            if(getHasBrick() && random.nextFloat() < (isIglooComplete() ? 0.005F : 0.0004F)) {
+                setHasBrick(false);
+            }
         }
     }
 
@@ -204,6 +209,8 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
                 setState(STATE_IDLE);
             }
         }
+        // update snow amount
+        updateOldSnow();
     }
 
     @Override
@@ -220,7 +227,7 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
         }*/
         int snowAmount = getSnowAmountForItem(itemStack);
         // use items to fill snow
-        if(snowAmount > 0) {
+        if(snowAmount > 0 && getSnow() < getMaxSnow()) {
             if(!level.isClientSide()) {
                 // add the snow
                 addSnow(snowAmount);
@@ -312,7 +319,7 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
      * @return the maximum number of children this queen can have
      */
     public int getMaxChildren(final int power) {
-        return 2 + power * 3 / 2;
+        return 3 + power * 3 / 2;
     }
 
     /**
@@ -320,7 +327,7 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
      * @return the desired igloo width based on the given power
      */
     public int getIglooWidth(final int power) {
-        return Math.min(48, 6 + ((power * 2) / 2) + 1);
+        return Math.min(48, 6 + ((power / 2) * 2) + 1);
     }
 
     /**
@@ -496,11 +503,11 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     }
 
     public int getOldSnow() {
-        return getEntityData().get(DATA_OLD_SNOW);
+        return snowO;
     }
 
     public void setOldSnow(final int snow) {
-        getEntityData().set(DATA_OLD_SNOW, Mth.clamp(snow, 0, getMaxSnow()));
+        snowO = Mth.clamp(snow, 0, getMaxSnow());
     }
 
     public void setSnow(final int snow) {
@@ -534,9 +541,10 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
             case STATE_IDLE:
             default:
                 if(getHasBrick()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.rimeite_queen.brick_out", ILoopType.EDefaultLoopTypes.HOLD_ON_LAST_FRAME));
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.rimeite_queen.idle_brick_out", ILoopType.EDefaultLoopTypes.LOOP));
+                } else {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.rimeite_queen.idle", ILoopType.EDefaultLoopTypes.LOOP));
                 }
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.rimeite_queen.idle", ILoopType.EDefaultLoopTypes.LOOP));
                 break;
         }
 
@@ -559,8 +567,8 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     public void readAdditionalSaveData(final CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         setState(tag.getByte(KEY_STATE));
-        setOldSnow(tag.getInt(KEY_OLD_SNOW));
-        setSnow(tag.getInt(KEY_SNOW));
+        snowO = tag.getInt(KEY_SNOW);
+        setSnow(snowO);
         setHasBrick(tag.getBoolean(KEY_BRICK));
         brickTimer = tag.getInt(KEY_BRICK_TIME);
         power = tag.getInt(KEY_POWER);
@@ -573,7 +581,6 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     public void addAdditionalSaveData(final CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putByte(KEY_STATE, getState());
-        tag.putInt(KEY_OLD_SNOW, getOldSnow());
         tag.putInt(KEY_SNOW, getSnow());
         tag.putBoolean(KEY_BRICK, getHasBrick());
         tag.putInt(KEY_BRICK_TIME, brickTimer);
@@ -687,8 +694,9 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
                 // stop moving
                 entity.getNavigation().stop();
                 // send particles
-                BlockState blockstate = entity.level.getBlockState(blockPos);
-                ((ServerLevel)entity.level).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockPos), entity.getX(), entity.getY() + 0.1D, entity.getZ(), 2, 0.5D, 0.5D, 0.5D, 0.15D);
+                BlockPos entityPos = entity.blockPosition().below();
+                BlockState blockstate = entity.level.getBlockState(entityPos);
+                ((ServerLevel)entity.level).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(entityPos), entity.getX(), entity.getY() + 0.1D, entity.getZ(), 2, 0.5D, 0.5D, 0.5D, 0.15D);
                 // update duration
                 if(++duration >= maxDuration) {
                     // calculate igloo width
@@ -758,6 +766,15 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
             Biome biome = level.getBiome(pos).value();
             if(biome.shouldSnowGolemBurn(pos)) {
                 return false;
+            }
+            // check for air or replaceable blocks around the position
+            int width = Math.max(2, entity.getIglooWidth(entity.power) / 2);
+            BlockState replace;
+            for(BlockPos p : BlockPos.betweenClosed(pos.offset(-width, 0, -width), pos.offset(width, width, width))) {
+                replace = level.getBlockState(p);
+                if(!(replace.isAir() || replace.getMaterial().isReplaceable())) {
+                    return false;
+                }
             }
             // all checks passed
             return true;

@@ -1,11 +1,15 @@
 package hearthjaw;
 
 import hearthjaw.entity.Bloomina;
+import hearthjaw.entity.Rimeite;
+import hearthjaw.entity.RimeiteQueen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -27,6 +31,11 @@ public final class HJEvents {
                 if(mob.getMobType() == MobType.ILLAGER || mob.getMobType() == MobType.UNDEAD) {
                     mob.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(mob, Bloomina.class, 15, true, true,
                             e -> (e instanceof Bloomina bloomina && !bloomina.isHiding())));
+                }
+                // spiders attack rimeite and rimeite queen
+                if(mob.getType() == EntityType.SPIDER || mob.getType() == EntityType.CAVE_SPIDER || mob instanceof Spider) {
+                    mob.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(mob, RimeiteQueen.class, true));
+                    mob.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(mob, Rimeite.class, true));
                 }
             }
             // lightning strike

@@ -3,8 +3,8 @@ package hearthjaw.entity;
 import hearthjaw.HJRegistry;
 import hearthjaw.util.IglooBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -27,10 +28,14 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
@@ -67,10 +72,13 @@ public class Rimeite extends PathfinderMob implements IAnimatable {
     protected static final byte START_SCOOPING_EVENT = (byte) 9;
     // CONSTANTS //
     protected static final int SCOOP_TIME = 20;
+    protected static final int MIN_SAW_QUEEN_TIME = 1200;
+    protected static final int MAX_SAW_QUEEN_TIME = 3600;
 
     // SERVER SIDE VARIABLES //
     protected UUID queenId;
     protected BlockPos buildTarget;
+    protected int sawQueenTimestamp;
 
     // GECKOLIB //
     protected AnimationFactory factory = GeckoLibUtil.createFactory(this);
@@ -114,43 +122,60 @@ public class Rimeite extends PathfinderMob implements IAnimatable {
         super.registerGoals();
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(2, new Rimeite.ScoopBrickGoal(this, 1.0D, SCOOP_TIME));
-        this.goalSelector.addGoal(3, new Rimeite.BuildIglooGoal(this, 0.8D));
+        this.goalSelector.addGoal(2, new Rimeite.GoToQueenGoal(this, 1.0D));
+        this.goalSelector.addGoal(3, new Rimeite.ScoopBrickGoal(this, 1.0D, SCOOP_TIME));
+        this.goalSelector.addGoal(4, new Rimeite.BuildIglooGoal(this, 0.8D));
         this.goalSelector.addGoal(7, new Rimeite.FollowQueenGoal(this, 1.0D, 6));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.7D));
 
         this.targetSelector.addGoal(0, new HurtByTargetGoal(this).setAlertOthers());
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Spider.class, false));
     }
 
     @Override
     public void aiStep() {
         super.aiStep();
-        // update animations
-        if(scoopTimer > 0) {
-            if(--scoopTimer <= 0) {
-                setState(STATE_IDLE);
+        // server side logic
+        if(!level.isClientSide() && level instanceof ServerLevel serverLevel) {
+            // take damage in warm biomes
+            Biome biome = level.getBiome(blockPosition()).value();
+            if(biome.shouldSnowGolemBurn(blockPosition())) {
+                hurt(DamageSource.ON_FIRE, 1.0F);
             }
-        }
-        // periodically check if queen exists and start dying if not
-        if(tickCount % 80 == 5 && level instanceof ServerLevel serverLevel) {
-            Optional<RimeiteQueen> oQueen = getQueen(serverLevel);
-            if(oQueen.isPresent()) {
-                RimeiteQueen queen = oQueen.get();
-                // update restriction to match the queen
-                if(queen.hasRestriction()) {
-                    this.restrictTo(queen.getRestrictCenter(), (int) (queen.getRestrictRadius() + 8));
-                }
-                // verify distance to queen
-                double maxDisToQueen = getAttributeValue(Attributes.FOLLOW_RANGE) * 2.0D;
-                if(!position().closerThan(queen.position(), maxDisToQueen)) {
-                    // queen is too far away, remove
-                    setQueen(null);
-                }
-            } else {
-                // no queen found, take damage
-                if(hurtTime == 0) {
+            // periodically check if queen exists and start dying if not
+            if(tickCount % 80 == 5) {
+                Optional<RimeiteQueen> oQueen = getQueen(serverLevel);
+                if(oQueen.isPresent()) {
+                    RimeiteQueen queen = oQueen.get();
+                    // update restriction to match the queen
+                    if(queen.hasRestriction()) {
+                        this.restrictTo(queen.getRestrictCenter(), (int) (queen.getRestrictRadius() + 8));
+                    }
+                    // check if the entity has not seen the queen for too long
+                    if(wantsToForgetQueen()) {
+                        setQueen(null);
+                    }
+                } else {
+                    // no queen found, take damage
                     this.hurt(DamageSource.STARVE, 2.0F);
                 }
+            }
+            // rarely destroy held brick
+            if(getHasBrick() && random.nextFloat() < 0.0002F) {
+                setHasBrick(false);
+                serverLevel.sendParticles(ParticleTypes.ITEM_SNOWBALL, getX(), getEyeY(), getZ(), 15, 0.15D, 0.15D, 0.15D, 0.05D);
+            }
+        }
+
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        // update animations
+        if(scoopTimer > 0) {
+            if(--scoopTimer <= 0 && !level.isClientSide()) {
+                setState(STATE_IDLE);
             }
         }
     }
@@ -175,6 +200,11 @@ public class Rimeite extends PathfinderMob implements IAnimatable {
     @Override
     public MobType getMobType() {
         return MobType.ARTHROPOD;
+    }
+
+    @Override
+    protected float getJumpPower() {
+        return super.getJumpPower() + 0.15F;
     }
 
     //// GECKOLIB ////
@@ -227,9 +257,28 @@ public class Rimeite extends PathfinderMob implements IAnimatable {
 
     @Override
     public void handleEntityEvent(byte event) {
+        final double particleMotion = 0.15D;
         switch(event) {
             case START_SCOOPING_EVENT:
                 scoopTimer = SCOOP_TIME;
+                break;
+            case EntityEvent.HURT:
+                super.handleEntityEvent(event);
+                for(int i = 0, n = 1 + random.nextInt(5); i < n; i++) {
+                    level.addParticle(ParticleTypes.ITEM_SNOWBALL, getX(), getEyeY(), getZ(),
+                            (random.nextDouble() - 0.5D) * 2.0D * particleMotion,
+                            random.nextDouble() * particleMotion,
+                            (random.nextDouble() - 0.5D) * 2.0D * particleMotion);
+                }
+                break;
+            case EntityEvent.DEATH:
+                super.handleEntityEvent(event);
+                for(int i = 0, n = 40 + random.nextInt(15); i < n; i++) {
+                    level.addParticle(ParticleTypes.ITEM_SNOWBALL, getX(), getEyeY(), getZ(),
+                            (random.nextDouble() - 0.5D) * 2.0D * particleMotion,
+                            random.nextDouble() * particleMotion,
+                            (random.nextDouble() - 0.5D) * 2.0D * particleMotion);
+                }
                 break;
             default:
                 super.handleEntityEvent(event);
@@ -297,6 +346,18 @@ public class Rimeite extends PathfinderMob implements IAnimatable {
             return Optional.empty();
         }
         return Optional.of((RimeiteQueen) queen);
+    }
+
+    public void setSawQueen(final int time) {
+        this.sawQueenTimestamp = time;
+    }
+
+    public boolean wantsToSeeQueen() {
+        return tickCount - sawQueenTimestamp > MIN_SAW_QUEEN_TIME + ((getId() * 3) % 1200);
+    }
+
+    public boolean wantsToForgetQueen() {
+        return tickCount - sawQueenTimestamp > MAX_SAW_QUEEN_TIME + ((getId() * 3) % 1200);
     }
 
     //// NBT ////
@@ -441,6 +502,83 @@ public class Rimeite extends PathfinderMob implements IAnimatable {
         }
     }
 
+    static class GoToQueenGoal extends Goal {
+
+        protected final Rimeite entity;
+        protected final double speedModifier;
+
+        protected RimeiteQueen queen;
+
+        public GoToQueenGoal(final Rimeite entity, final double speed) {
+            this.entity = entity;
+            this.speedModifier = speed;
+            setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            // check queen timestamp
+            if(!entity.wantsToSeeQueen()) {
+                return false;
+            }
+            // locate queen
+            Optional<RimeiteQueen> oQueen = entity.getQueen((ServerLevel) entity.level);
+            if(oQueen.isEmpty()) {
+                return false;
+            }
+            queen = oQueen.get();
+            // all checks passed
+            return true;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return queen != null && entity.wantsToSeeQueen();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return entity.wantsToSeeQueen();
+        }
+
+        @Override
+        public void start() {
+            moveMobToQueen();
+        }
+
+        @Override
+        public void tick() {
+            if (null == queen) {
+                stop();
+                return;
+            }
+            // update target reached flag
+            boolean isTargetReached = entity.position().closerThan(queen.position(), getAcceptedDistance());
+            if(isTargetReached) {
+                // stop moving
+                entity.getNavigation().stop();
+                // update timestamp
+                entity.setSawQueen(entity.tickCount);
+                ((ServerLevel)entity.level).sendParticles(ParticleTypes.HEART, entity.getX(), entity.getEyeY() + 0.15D, entity.getZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                stop();
+                return;
+            } else if(entity.tickCount % 40 == 0) {
+                // recalculate path
+                moveMobToQueen();
+            }
+        }
+
+        protected void moveMobToQueen() {
+            if(queen != null) {
+                entity.getNavigation().moveTo(queen, speedModifier);
+            }
+        }
+
+        protected double getAcceptedDistance() {
+            return 2.0D;
+        }
+    }
+
     static class BuildIglooGoal extends MoveToBlockGoal {
 
         protected final Rimeite entity;
@@ -486,7 +624,7 @@ public class Rimeite extends PathfinderMob implements IAnimatable {
         public void tick() {
             if(isReachedTarget()) {
                 // ensure there are no entity collisions here
-                List<Entity> list = entity.level.getEntitiesOfClass(Entity.class, new AABB(blockPos));
+                List<Entity> list = entity.level.getEntitiesOfClass(Entity.class, new AABB(blockPos).deflate(0.125D));
                 if(list.isEmpty()) {
                     // determine the block to place
                     Optional<BlockState> oBlockState = IglooBuilder.getBuildingBlock(entity.level, blockPos);

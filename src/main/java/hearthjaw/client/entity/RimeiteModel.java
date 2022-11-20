@@ -35,7 +35,7 @@ public class RimeiteModel<T extends Rimeite> extends AnimatedGeoModel<T> {
     @Override
     public void setCustomAnimations(T animatable, int instanceId, AnimationEvent animationEvent) {
         // hide brick
-        boolean hidden = !animatable.getHasBrick();
+        boolean hidden = !(animatable.getHasBrick() || animatable.isScooping());
         final IBone brick = this.getBone("brick");
         brick.setHidden(hidden);
         // run custom animations

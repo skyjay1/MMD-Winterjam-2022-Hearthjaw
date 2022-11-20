@@ -78,6 +78,7 @@ public final class HJRegistry {
                         .lightLevel(b -> b.getValue(MovingLightBlock.LEVEL))));
         public static final RegistryObject<Block> SNOW_BRICKS = BLOCKS.register("snow_bricks", () ->
                 new SlabBlock(BlockBehaviour.Properties.of(Material.ICE_SOLID)
+                        .requiresCorrectToolForDrops()
                         .strength(1.5F, 6.0F)));
 
     }

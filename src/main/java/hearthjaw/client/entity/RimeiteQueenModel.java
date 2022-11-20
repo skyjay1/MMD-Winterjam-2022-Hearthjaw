@@ -4,6 +4,9 @@ import hearthjaw.HJMain;
 import hearthjaw.entity.Rimeite;
 import hearthjaw.entity.RimeiteQueen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class RimeiteQueenModel<T extends RimeiteQueen> extends AnimatedGeoModel<T> {
@@ -29,5 +32,22 @@ public class RimeiteQueenModel<T extends RimeiteQueen> extends AnimatedGeoModel<
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
         return ANIMATIONS;
+    }
+
+    @Override
+    public void setCustomAnimations(T animatable, int instanceId, AnimationEvent animationEvent) {
+        super.setCustomAnimations(animatable, instanceId, animationEvent);
+        // hide brick
+        final boolean brickHidden = !(animatable.getHasBrick() || animatable.isBricking());
+        final IBone brick = this.getBone("brick");
+        brick.setHidden(brickHidden);
+        // update snow position
+        final IBone snow = this.getBone("snow");
+        final float startY = 17.0F;
+        final float endY = 6.0F;
+        final float oldSnow = (float) animatable.getOldSnow();
+        final float snowPercent = 1.0F - (oldSnow / (float) RimeiteQueen.getMaxSnow());
+        snow.setHidden(oldSnow < 1.0F);
+        snow.setPositionY((-(startY - endY) * snowPercent));
     }
 }

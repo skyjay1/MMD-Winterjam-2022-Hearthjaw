@@ -12,7 +12,10 @@ import hearthjaw.item.HearthgoopItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -21,8 +24,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -102,6 +107,7 @@ public final class HJRegistry {
         public static void register() {
             ENTITY_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
             FMLJavaModLoadingContext.get().getModEventBus().addListener(EntityReg::onRegisterAttributes);
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(EntityReg::onRegisterSpawnPlacements);
         }
 
         private static void onRegisterAttributes(final EntityAttributeCreationEvent event) {
@@ -109,6 +115,13 @@ public final class HJRegistry {
             event.put(HEARTHJAW.get(), Hearthjaw.createAttributes().build());
             event.put(RIMEITE_QUEEN.get(), RimeiteQueen.createAttributes().build());
             event.put(RIMEITE.get(), Rimeite.createAttributes().build());
+        }
+
+        private static void onRegisterSpawnPlacements(final SpawnPlacementRegisterEvent event) {
+            event.register(BLOOMINA.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
+            event.register(HEARTHJAW.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
+            event.register(RIMEITE_QUEEN.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, RimeiteQueen::checkRimeiteQueenSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
+            event.register(RIMEITE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
         }
 
         public static final RegistryObject<EntityType<Bloomina>> BLOOMINA = ENTITY_TYPES.register("bloomina", () ->

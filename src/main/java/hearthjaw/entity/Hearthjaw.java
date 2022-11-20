@@ -42,6 +42,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -71,7 +72,7 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 import java.util.EnumSet;
 import java.util.UUID;
 
-public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
+public class Hearthjaw extends Animal implements NeutralMob, IAnimatable {
 
     // SYNCED DATA //
     private static final EntityDataAccessor<Byte> DATA_STATE = SynchedEntityData.defineId(Hearthjaw.class, EntityDataSerializers.BYTE);
@@ -80,6 +81,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
     private static final String KEY_FUEL = "Fuel";
     private static final String KEY_NAPPING_TIME = "Napping";
     private static final String KEY_WANTS_TO_NAP = "WantsToNap";
+    private static final String KEY_ANIMATION_TIME = "AnimationTime";
     // STATES //
     protected static final byte STATE_IDLE = (byte) 0;
     protected static final byte STATE_BITE = (byte) 1;
@@ -200,7 +202,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
     }
 
     @Override
-    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
         // update napping
         if (isNapping()) {
             setState(STATE_IDLE);
@@ -266,6 +268,12 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
 
     @Override
     public boolean canBreed() {
+        // TODO
+        return false;
+    }
+
+    @Override
+    public boolean isFood(ItemStack itemStack) {
         // TODO
         return false;
     }
@@ -345,6 +353,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         wantsToNap = tag.getBoolean(KEY_WANTS_TO_NAP);
         nappingTime = tag.getInt(KEY_NAPPING_TIME);
         isWarm = getFuel() > 0;
+        animationTimer = tag.getInt(KEY_ANIMATION_TIME);
     }
 
     @Override
@@ -355,6 +364,7 @@ public class Hearthjaw extends AgeableMob implements NeutralMob, IAnimatable {
         tag.putInt(KEY_FUEL, getFuel());
         tag.putBoolean(KEY_WANTS_TO_NAP, wantsToNap);
         tag.putInt(KEY_NAPPING_TIME, nappingTime);
+        tag.putInt(KEY_ANIMATION_TIME, animationTimer);
     }
 
     //// SOUNDS ////

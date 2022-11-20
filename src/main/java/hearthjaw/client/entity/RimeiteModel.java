@@ -3,6 +3,8 @@ package hearthjaw.client.entity;
 import hearthjaw.HJMain;
 import hearthjaw.entity.Rimeite;
 import net.minecraft.resources.ResourceLocation;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class RimeiteModel<T extends Rimeite> extends AnimatedGeoModel<T> {
@@ -28,5 +30,15 @@ public class RimeiteModel<T extends Rimeite> extends AnimatedGeoModel<T> {
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
         return ANIMATIONS;
+    }
+
+    @Override
+    public void setCustomAnimations(T animatable, int instanceId, AnimationEvent animationEvent) {
+        // hide brick
+        boolean hidden = !animatable.getHasBrick();
+        final IBone brick = this.getBone("brick");
+        brick.setHidden(hidden);
+        // run custom animations
+        super.setCustomAnimations(animatable, instanceId, animationEvent);
     }
 }

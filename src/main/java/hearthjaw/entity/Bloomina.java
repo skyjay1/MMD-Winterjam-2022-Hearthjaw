@@ -174,8 +174,7 @@ public class Bloomina extends Animal implements FlyingAnimal, IAnimatable {
         super.aiStep();
         // update restriction
         if(tickCount % 55 == 1 && hasRestriction() && getRestrictCenter() != BlockPos.ZERO) {
-            BlockState blockState = level.getBlockState(getRestrictCenter());
-            if(!blockState.is(HOME)) {
+            if(!blockPosition().closerThan(getRestrictCenter(), getRestrictRadius() * 2.0F) || !level.getBlockState(getRestrictCenter()).is(HOME)) {
                 clearRestriction();
             }
         }

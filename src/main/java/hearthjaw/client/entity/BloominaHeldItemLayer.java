@@ -31,35 +31,11 @@ public class BloominaHeldItemLayer <T extends Bloomina> extends AbstractLayerGeo
         GeoModel model = getEntityModel().getModel(this.funcGetCurrentModel.apply(entity));
         Optional<GeoBone> arm = model.getBone("arm0");
         if(arm.isPresent()) {
-            //RenderUtils.translateAndRotateMatrixForBone(poseStack, arm.get());
             poseStack.mulPoseMatrix(arm.get().getModelSpaceXform());
             poseStack.translate(1.5D / 16.0D, -9.0D / 16.0D, -1.0D / 16.0D);
             ItemStack itemStack = entity.getItemInHand(InteractionHand.MAIN_HAND);
             itemInHandRenderer.renderItem(entity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, multiBufferSource, packedLight);
         }
-
         poseStack.popPose();
-    }
-
-    private static void translateRotate(final GeoBone bone, final PoseStack poseStack) {
-        poseStack.mulPoseMatrix(bone.getModelSpaceXform());
-        /*
-
-        poseStack.translate(bone.getPositionX() / 16.0F, bone.getPositionY() / 16.0F, bone.getPositionZ() / 16.0F);
-        if (bone.getRotationZ() != 0.0F) {
-            poseStack.mulPose(Vector3f.ZP.rotation(this.zRot));
-        }
-
-        if (bone.getRotationY() != 0.0F) {
-            poseStack.mulPose(Vector3f.YP.rotation(this.yRot));
-        }
-
-        if (bone.getRotationX() != 0.0F) {
-            poseStack.mulPose(Vector3f.XP.rotation(this.xRot));
-        }
-
-        if (bone.getScaleX() != 1.0F || bone.getScaleY() != 1.0F || bone.getScaleZ() != 1.0F) {
-            poseStack.scale(bone.getScaleX(), bone.getScaleY(), bone.getScaleZ());
-        }*/
     }
 }

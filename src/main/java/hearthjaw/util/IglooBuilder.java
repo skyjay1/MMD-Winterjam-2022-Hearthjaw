@@ -18,9 +18,11 @@ import net.minecraftforge.common.util.NonNullLazy;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class IglooBuilder implements INBTSerializable<CompoundTag> {
 
@@ -70,7 +72,7 @@ public class IglooBuilder implements INBTSerializable<CompoundTag> {
      * @param pos the position to be replaced with a building block
      * @return the building block if possible, or an empty optional
      */
-    public Optional<BlockState> getBuildingBlock(final LevelReader level, final BlockPos pos) {
+    public static Optional<BlockState> getBuildingBlock(final LevelReader level, final BlockPos pos) {
         // check for existing snow bricks
         BlockState blockState = level.getBlockState(pos);
         if(blockState.is(HJRegistry.BlockReg.SNOW_BRICKS.get())) {
@@ -102,7 +104,7 @@ public class IglooBuilder implements INBTSerializable<CompoundTag> {
      * @param pos the position
      * @return true if the given position can be replaced with a building block
      */
-    public boolean canBuildAt(final LevelReader level, final BlockPos pos) {
+    public static boolean canBuildAt(final LevelReader level, final BlockPos pos) {
         final BlockState blockState = level.getBlockState(pos);
         // check for empty
         if(blockState.isAir()) {
@@ -120,6 +122,22 @@ public class IglooBuilder implements INBTSerializable<CompoundTag> {
         return false;
     }
 
+    /**
+     * @param level the level
+     * @return true if all blocks are occupied
+     */
+    public boolean isComplete(final LevelReader level) {
+        for(BlockPos pos : getPositions()) {
+            if(canBuildAt(level, pos)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @return a list of block positions in this igloo
+     */
     @NotNull
     private List<BlockPos> calculate() {
         // calculate values
@@ -127,34 +145,34 @@ public class IglooBuilder implements INBTSerializable<CompoundTag> {
         final Vec3 center = Vec3.atCenterOf(this.center);
         final double margin = 0.55D;
         // create a list to store positions
-        List<BlockPos> list = new ArrayList<>(Mth.ceil(2.0D * Math.PI * radius * radius));
+        Set<BlockPos> set = new HashSet<>(Mth.ceil(2.0D * Math.PI * radius * radius));
         // Iterate over a portion of the bounds and add block positions that are within range.
         Vec3 test;
-        for(double y = -maxDepth; y < radius; y++) {
-            for(double x = 0; x < radius; x++) {
-                for(double z = 0; z < radius; z++) {
+        for(double y = -maxDepth; y <= radius; y++) {
+            for(double x = 0; x <= radius; x++) {
+                for(double z = 0; z <= radius; z++) {
                     // do not cover the center block
                     if(x == 0 && z == 0) {
                         continue;
                     }
                     // do not cover the bottom middle blocks on north and south
-                    if(y > -2 && y < 2 && x < 1) {
+                    if(y > -3 && y < 1 && x < 1) {
                         continue;
                     }
                     // check if the given position is at the edge of a sphere
                     test = center.add(x, Math.max(0, y), z);
                     if(center.closerThan(test, radius + margin) && !center.closerThan(test, radius - margin)) {
                         // add the block position and its mirrors
-                        list.add(this.center.offset(x, y, z));
-                        list.add(this.center.offset(x, y, -z));
-                        list.add(this.center.offset(-x, y, z));
-                        list.add(this.center.offset(-x, y, -z));
+                        set.add(this.center.offset(x, y, z));
+                        set.add(this.center.offset(x, y, -z));
+                        set.add(this.center.offset(-x, y, z));
+                        set.add(this.center.offset(-x, y, -z));
                     }
                 }
             }
         }
 
-        return list;
+        return new ArrayList<>(set);
     }
 
     //// GETTERS ////

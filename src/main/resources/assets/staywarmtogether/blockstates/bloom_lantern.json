@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "staywarmtogether:block/bloom_lantern"
+    },
+    "hanging=true": {
+      "model": "staywarmtogether:block/hanging_bloom_lantern"
+    }
+  }
+}

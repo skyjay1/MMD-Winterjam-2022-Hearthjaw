@@ -1,0 +1,21 @@
+{
+  "itemGroup.staywarmtogether": "Hearthjaw",
+  "entity.staywarmtogether.bloomina": "Bloomina",
+  "entity.staywarmtogether.staywarmtogether": "Hearthjaw",
+  "entity.staywarmtogether.rimeite": "Rimeite",
+  "entity.staywarmtogether.rimeite_queen": "Rimeite Queen",
+  "block.staywarmtogether.bloomina_bud": "Bloomina Bud",
+  "block.staywarmtogether.bloom_lantern": "Bloom Lantern",
+  "block.staywarmtogether.hearthgoop": "Hearthgoop",
+  "block.staywarmtogether.hearthgoop.tooltip": "Can be eaten to stop freezing",
+  "block.staywarmtogether.light": "Moving Light",
+  "block.staywarmtogether.snow_bricks": "Snow Bricks",
+  "item.staywarmtogether.bloomlight": "Bloomlight",
+  "item.staywarmtogether.bloomlight_on_a_stick": "Bloomlight on a Stick",
+  "subtitles.entity.staywarmtogether.bloomina.ambient": "Bloomina chirps",
+  "subtitles.entity.staywarmtogether.bloomina.burp": "Bloomina burps",
+  "subtitles.entity.staywarmtogether.bloomina.hurt": "Bloomina hurts",
+  "subtitles.entity.staywarmtogether.hearthjaw.ambient": "Hearthjaw grunts",
+  "subtitles.entity.staywarmtogether.hearthjaw.breathe": "Hearthjaw breathes",
+  "subtitles.entity.staywarmtogether.hearthjaw.hurt": "Hearthjaw hurts"
+}

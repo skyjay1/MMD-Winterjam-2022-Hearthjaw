@@ -1,0 +1,39 @@
+{
+  "entity.bloomina.ambient": {
+    "sounds": [
+      "staywarmtogether:464673__branndybottle__femalegrunt3",
+      "staywarmtogether:464674__branndybottle__femalegrunt2"
+    ],
+    "subtitle": "subtitles.entity.staywarmtogether.bloomina.ambient"
+  },
+  "entity.bloomina.burp": {
+    "sounds": [ "staywarmtogether:389463__lzmraul__human-burp" ],
+    "subtitle": "subtitles.entity.staywarmtogether.bloomina.burp"
+  },
+  "entity.bloomina.hurt": {
+    "sounds": [ "staywarmtogether:203976__thatbennyguy__female-hurt" ],
+    "subtitle": "subtitles.entity.staywarmtogether.bloomina.hurt"
+  },
+  "entity.bloomina.scared": {
+    "sounds": [ "staywarmtogether:445119__breviceps__animal-cartoon-cooing-curr-parrot" ],
+    "subtitle": "subtitles.entity.staywarmtogether.bloomina.scared"
+  },
+  "entity.hearthjaw.ambient": {
+    "sounds": [
+      "staywarmtogether:377580__yudena__grunt-bymondfisch89",
+      "staywarmtogether:554408__fivebrosstopmosyt__alien-grunt-3"
+    ],
+    "subtitle": "subtitles.entity.staywarmtogether.hearthjaw.ambient"
+  },
+  "entity.hearthjaw.breathe": {
+    "sounds": [ "staywarmtogether:50923__rutgermuller__vocal-creepy-krw" ],
+    "subtitle": "subtitles.entity.staywarmtogether.hearthjaw.breathe"
+  },
+  "entity.hearthjaw.hurt": {
+    "sounds": [
+      "staywarmtogether:521951__kastenfrosch__weird-grunt",
+      "staywarmtogether:432194__surfaceknight68__single-monster-grunt"
+    ],
+    "subtitle": "subtitles.entity.staywarmtogether.hearthjaw.hurt"
+  }
+}

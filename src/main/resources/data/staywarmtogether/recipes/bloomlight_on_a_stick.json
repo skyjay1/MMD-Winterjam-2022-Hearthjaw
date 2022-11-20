@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:fishing_rod" },
+    { "item": "staywarmtogether:bloomlight" }
+  ],
+  "result": {
+    "item": "staywarmtogether:bloomlight_on_a_stick",
+    "count": 1
+  }
+}

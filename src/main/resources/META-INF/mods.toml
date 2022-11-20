@@ -3,19 +3,19 @@ loaderVersion="[43,)"
 license="GNU LGPLv3"
 
 [[mods]]
-    modId="hearthjaw"
+    modId="staywarmtogether"
     version="19.2.0.3"
     displayName="Hearthjaw"
     authors="skyjay1"
     description='''MMD Winterjam 2022'''
 
-[[dependencies.hearthjaw]]
+[[dependencies.staywarmtogether]]
     modId="forge"
     mandatory=true
     versionRange="[43.1.7,)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.hearthjaw]]
+[[dependencies.staywarmtogether]]
     modId="geckolib3"
     mandatory=true
     versionRange="[3.1.36,)"

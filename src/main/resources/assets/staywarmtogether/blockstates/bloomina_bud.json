@@ -1,0 +1,13 @@
+{
+  "variants": {
+	"age=0": {
+	  "model": "staywarmtogether:block/bloomina_bud"
+	},
+	"age=1": {
+	  "model": "staywarmtogether:block/bloomina_bud"
+	},
+	"age=2": {
+	 "model": "staywarmtogether:block/bloomina_bud_ripe"
+	}
+  }
+}

@@ -1,7 +1,0 @@
-{
-  "variants": {
-    "type=bottom": { "model": "hearthjaw:block/snow_bricks_bottom" },
-    "type=double": { "model": "hearthjaw:block/snow_bricks" },
-    "type=top": { "model": "hearthjaw:block/snow_bricks_top" }
-  }
-}

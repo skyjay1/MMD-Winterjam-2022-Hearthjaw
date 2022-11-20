@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "render_type": "cutout",
+  "textures": {
+	  "cross": "staywarmtogether:block/bloomina_bud_ripe"
+    }
+}

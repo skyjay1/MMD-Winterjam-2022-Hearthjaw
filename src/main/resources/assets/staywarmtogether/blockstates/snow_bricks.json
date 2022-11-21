@@ -1,7 +1,5 @@
 {
   "variants": {
-    "type=bottom": { "model": "staywarmtogether:block/snow_bricks_bottom" },
-    "type=double": { "model": "staywarmtogether:block/snow_bricks" },
-    "type=top": { "model": "staywarmtogether:block/snow_bricks_top" }
+    "": { "model": "staywarmtogether:block/snow_bricks" }
   }
 }

@@ -6,14 +6,15 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "staywarmtogether:hearthgoop",
-          "conditions": [
-            {
-              "condition": "minecraft:survives_explosion"
-            }
-          ]
+          "name": "staywarmtogether:hearthgoop"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
         }
       ]
     }
   ]
 }
+

@@ -1,23 +1,32 @@
 package staywarmtogether.entity;
 
+import net.minecraft.Util;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import staywarmtogether.SWTRegistry;
+import staywarmtogether.block.SnowBricksJellyBlock;
 import staywarmtogether.util.IglooBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -155,6 +164,7 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
         this.goalSelector.addGoal(2, new Rimeite.VisitQueenGoal(this, 1.1D, MIN_SAW_QUEEN_DISTANCE));
         this.goalSelector.addGoal(3, new Rimeite.FeedQueenGoal(this, 0.9D));
         this.goalSelector.addGoal(4, new Rimeite.ScoopBrickGoal(this, 1.0D, SCOOP_TIME));
+        this.goalSelector.addGoal(5, new Rimeite.BuildJellyGoal(this, 0.8D, 10));
         this.goalSelector.addGoal(5, new Rimeite.BuildIglooGoal(this, 0.8D));
         this.goalSelector.addGoal(6, new Rimeite.HarvestSnowGoal(this, 1.0D, 14));
         this.goalSelector.addGoal(7, new Rimeite.FollowQueenGoal(this, 1.0D, 6));
@@ -201,11 +211,6 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
                     this.hurt(DamageSource.STARVE, 2.0F);
                 }
             }
-            // rarely destroy held brick
-            if(getHasBrick() && random.nextFloat() < 0.0002F) {
-                setHasBrick(false);
-                serverLevel.sendParticles(ParticleTypes.ITEM_SNOWBALL, getX(), getEyeY(), getZ(), 15, 0.15D, 0.15D, 0.15D, 0.05D);
-            }
         }
 
     }
@@ -228,6 +233,27 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
                 setState(STATE_IDLE);
             }
         }
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+        if(itemStack.is(SWTRegistry.ItemReg.RIMEITE_JELLY.get())) {
+            if(!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                // remove item
+                itemStack.shrink(1);
+                ItemStack result = itemStack.getCraftingRemainingItem();
+                if (itemStack.isEmpty()) {
+                    player.setItemInHand(hand, result);
+                } else if (!player.getInventory().add(result)) {
+                    player.drop(result, false);
+                }
+                // spawn queen
+                convertToQueen(serverPlayer, this);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return super.mobInteract(player, hand);
     }
 
     @Override
@@ -270,6 +296,30 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
     public boolean requiresCustomPersistence() {
         return getQueenId().isPresent();
     }
+
+    //// HELPER METHODS ////
+
+    protected static boolean convertToQueen(final ServerPlayer player, final Rimeite entity) {
+        RimeiteQueen queen = SWTRegistry.EntityReg.RIMEITE_QUEEN.get().create(player.getLevel());
+        // prepare the queen
+        queen.copyPosition(entity);
+        if(entity.hasCustomName()) {
+            queen.setCustomName(entity.getCustomName());
+        }
+        // spawn the queen
+        player.getLevel().addFreshEntity(queen);
+        queen.finalizeSpawn(player.getLevel(), player.getLevel().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.CONVERSION, null, null);
+        // award stat
+        CriteriaTriggers.SUMMONED_ENTITY.trigger(player, queen);
+        // play sound
+        player.playSound(SoundEvents.ZOMBIE_VILLAGER_CURE);
+        // remove entity
+        entity.discard();
+        // send particles
+        player.getLevel().sendParticles(ParticleTypes.ITEM_SNOWBALL, queen.getX(), queen.getEyeY(), queen.getZ(), 30, 0.0D, 0.15D, 0.0D, 0.1D);
+        return true;
+    }
+
 
     //// RANGED ATTACK ////
 
@@ -941,6 +991,10 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
                     entity.setState(STATE_BUILD);
                     entity.animationTimer = THROW_TIME;
                     entity.level.broadcastEntityEvent(entity, START_BUILDING_EVENT);
+                    // jump if needed
+                    if(entity.blockPosition().getY() < blockPos.getY() - 1 && entity.isOnGround()) {
+                        entity.jumpControl.jump();
+                    }
                 }
                 stop();
                 return;
@@ -960,7 +1014,7 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
 
         @Override
         protected boolean isReachedTarget() {
-            return entity.isCloseToBuildTarget(2.0D);
+            return entity.isCloseToBuildTarget(2.15D);
         }
 
         @Override
@@ -1048,5 +1102,180 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
             return true;
         }
 
+    }
+
+    static class BuildJellyGoal extends MoveToBlockGoal {
+
+        protected final Rimeite entity;
+        protected final int chance;
+
+        protected RimeiteQueen queen;
+        protected Direction direction;
+
+        public BuildJellyGoal(final Rimeite entity, final double speed, final int chance) {
+            super(entity, speed, -1, -1);
+            this.entity = entity;
+            this.chance = Math.max(1, chance);
+        }
+
+        @Override
+        public boolean canUse() {
+            // check game rule
+            if(!entity.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+                return false;
+            }
+            // check for idle and held brick
+            if(!(entity.isIdle() && entity.getHasBrick())) {
+                return false;
+            }
+            // locate queen
+            Optional<RimeiteQueen> oQueen = entity.getQueen((ServerLevel) entity.level);
+            if(oQueen.isEmpty()) {
+                return false;
+            }
+            queen = oQueen.get();
+            // ensure queen has igloo builder
+            if(!queen.hasIglooBuilder() || queen.isDeadOrDying()) {
+                return false;
+            }
+            // random chance
+            if(!queen.isIglooComplete() && entity.getRandom().nextInt(chance) > 0) {
+                return false;
+            }
+            return super.canUse();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return queen != null && entity.isIdle() && entity.getHasBrick() && this.direction != null && super.canContinueToUse();
+        }
+
+        @Override
+        protected boolean findNearestBlock() {
+            if(null == queen || !queen.hasIglooBuilder() || queen.getIglooBuilder().getPositions().isEmpty()) {
+                return false;
+            }
+            BlockPos entityPos = entity.blockPosition();
+            BlockPos pos;
+            for(int tries = 0, maxTries = 10; tries < maxTries; tries++) {
+                // locate a random igloo position at the same y level as the entity
+                pos = Util.getRandom(queen.getIglooBuilder().getPositions(), entity.getRandom());
+                if(pos.getY() != entityPos.getY()) {
+                    continue;
+                }
+                // check for valid position
+                if (entity.isWithinRestriction(pos) && this.isValidTarget(this.mob.level, pos)) {
+                    this.blockPos = pos;
+                    return true;
+                }
+            }
+            // no checks passed
+            return false;
+        }
+
+        @Override
+        public void tick() {
+            if(isReachedTarget()) {
+                // attempt to place block at this position
+                if(entity.getHasBrick() && ForgeEventFactory.getMobGriefingEvent(entity.level, entity)) {
+                    BlockState blockState = entity.level.getBlockState(blockPos);
+                    if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS_JELLY.get())) {
+                        // update jelly block
+                        int jellyLevel = blockState.getValue(SnowBricksJellyBlock.JELLY_LEVEL);
+                        entity.level.setBlock(blockPos, blockState.setValue(SnowBricksJellyBlock.JELLY_LEVEL, Math.min(SnowBricksJellyBlock.MAX_JELLY, jellyLevel + 1)), Block.UPDATE_ALL);
+                        // play sound
+                        entity.playSound(SoundEvents.HONEY_BLOCK_PLACE);
+                    } else {
+                        // place jelly block
+                        BlockState replace = SWTRegistry.BlockReg.SNOW_BRICKS_JELLY.get().defaultBlockState()
+                                .setValue(SnowBricksJellyBlock.JELLY_LEVEL, 0)
+                                .setValue(SnowBricksJellyBlock.FACING, direction);
+                        entity.level.setBlock(blockPos, replace, Block.UPDATE_ALL);
+                        // play sound
+                        entity.playSound(replace.getSoundType().getPlaceSound());
+                    }
+                }
+                // finish
+                entity.getNavigation().stop();
+                entity.setHasBrick(false);
+                stop();
+                return;
+            }
+            super.tick();
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.direction = null;
+        }
+
+        @Override
+        protected BlockPos getMoveToTarget() {
+            return blockPos.relative(direction).below();
+        }
+
+        @Override
+        protected boolean isValidTarget(LevelReader level, BlockPos blockPos) {
+            if(null == queen || !queen.hasIglooBuilder()) {
+                return false;
+            }
+            // check if the block can be replaced with jelly block
+            BlockState blockState = level.getBlockState(blockPos);
+            if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS.get()) || (blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS_SLAB.get()) && blockState.getValue(SlabBlock.TYPE) == SlabType.DOUBLE)) {
+                // check for adjacent snow jelly
+                for(Direction direction : Direction.Plane.HORIZONTAL) {
+                    if(level.getBlockState(blockPos.relative(direction)).is(SWTRegistry.BlockReg.SNOW_BRICKS_JELLY.get())) {
+                        return false;
+                    }
+                }
+            } else if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS_JELLY.get())) {
+                // check for filled jelly
+                if(blockState.getValue(SnowBricksJellyBlock.JELLY_LEVEL) >= SnowBricksJellyBlock.MAX_JELLY) {
+                    return false;
+                }
+            }
+            // block can be replaced, check for ground level
+            // determine the direction towards the center
+            Optional<Direction> oDirection = getDirectionToCenter(blockPos, queen.getIglooBuilder().getCenter());
+            if(oDirection.isEmpty()) {
+                return false;
+            }
+            // determine the pathfinding block
+            BlockPos pathTo = blockPos.relative(oDirection.get()).below();
+            if(!level.getBlockState(pathTo).isFaceSturdy(level, pathTo, Direction.UP)) {
+                return false;
+            }
+            // all checks passed
+            this.direction = oDirection.get();
+            return true;
+        }
+
+        @Override
+        public double acceptedDistance() {
+            return 1.25D;
+        }
+
+        /**
+         * @param blockPos the original block position
+         * @param center the block position to move toward
+         * @return the first direction offset that is closer to the center than the original
+         */
+        protected Optional<Direction> getDirectionToCenter(final BlockPos blockPos, final BlockPos center) {
+            // check for equality
+            if(blockPos.equals(center)) {
+                return Optional.empty();
+            }
+            BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+            double distSq = blockPos.distSqr(center);
+            // determine the direction toward the center of the igloo
+            for(Direction direction : Direction.Plane.HORIZONTAL) {
+                mutableBlockPos.setWithOffset(blockPos, direction);
+                if(mutableBlockPos.distSqr(center) < distSq) {
+                    return Optional.of(direction);
+                }
+            }
+            return Optional.empty();
+        }
     }
 }

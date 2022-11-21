@@ -79,6 +79,10 @@ public final class SWTRegistry {
                         .strength(-1F).noCollission().randomTicks()
                         .lightLevel(b -> b.getValue(MovingLightBlock.LEVEL))));
         public static final RegistryObject<Block> SNOW_BRICKS = BLOCKS.register("snow_bricks", () ->
+                new Block(BlockBehaviour.Properties.of(Material.ICE_SOLID)
+                        .requiresCorrectToolForDrops()
+                        .strength(1.5F, 6.0F)));
+        public static final RegistryObject<Block> SNOW_BRICKS_SLAB = BLOCKS.register("snow_bricks_slab", () ->
                 new SlabBlock(BlockBehaviour.Properties.of(Material.ICE_SOLID)
                         .requiresCorrectToolForDrops()
                         .strength(1.5F, 6.0F)));
@@ -105,9 +109,11 @@ public final class SWTRegistry {
         public static final RegistryObject<Item> HEARTHGOOP = ITEMS.register("hearthgoop", () ->
                 new HearthgoopItem(BlockReg.HEARTHGOOP.get(), new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> RIMEITE_JELLY = ITEMS.register("rimeite_jelly", () ->
-                new Item(new Item.Properties().tab(HJ_TAB)));
+                new Item(new Item.Properties().tab(HJ_TAB).stacksTo(16)));
         public static final RegistryObject<Item> SNOW_BRICKS = ITEMS.register("snow_bricks", () ->
                 new BlockItem(BlockReg.SNOW_BRICKS.get(), new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> SNOW_BRICKS_SLAB = ITEMS.register("snow_bricks_slab", () ->
+                new BlockItem(BlockReg.SNOW_BRICKS_SLAB.get(), new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> SNOW_BRICKS_JELLY = ITEMS.register("snow_bricks_jelly", () ->
                 new BlockItem(BlockReg.SNOW_BRICKS_JELLY.get(), new Item.Properties().tab(HJ_TAB)));
     }
@@ -158,7 +164,7 @@ public final class SWTRegistry {
         public static final RegistryObject<EntityType<? extends SnowBrickProjectile>> SNOW_BRICK = ENTITY_TYPES.register("snow_brick", () ->
                 EntityType.Builder.<SnowBrickProjectile>of(SnowBrickProjectile::new, MobCategory.MISC)
                         .sized(0.25F, 0.25F)
-                        // TODO re-enable .noSave().noSummon()
+                        .noSave().noSummon()
                         .clientTrackingRange(4).updateInterval(5)
                         .build("snow_brick"));
     }

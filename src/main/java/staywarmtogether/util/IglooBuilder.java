@@ -75,11 +75,11 @@ public class IglooBuilder implements INBTSerializable<CompoundTag> {
     public static Optional<BlockState> getBuildingBlock(final LevelReader level, final BlockPos pos) {
         // check for existing snow bricks
         BlockState blockState = level.getBlockState(pos);
-        if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS.get())) {
+        if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS_SLAB.get())) {
             switch (blockState.getValue(SlabBlock.TYPE)) {
                 case TOP:
                 case BOTTOM:
-                    return Optional.of(blockState.setValue(SlabBlock.TYPE, SlabType.DOUBLE));
+                    return Optional.of(SWTRegistry.BlockReg.SNOW_BRICKS.get().defaultBlockState());
                 case DOUBLE: default:
                     return Optional.empty();
             }
@@ -92,7 +92,7 @@ public class IglooBuilder implements INBTSerializable<CompoundTag> {
             }
             relative = pos.relative(direction);
             if(level.getBlockState(relative).isFaceSturdy(level, relative, direction.getOpposite())) {
-                return Optional.of(SWTRegistry.BlockReg.SNOW_BRICKS.get().defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
+                return Optional.of(SWTRegistry.BlockReg.SNOW_BRICKS_SLAB.get().defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
             }
         }
         // no checks passed
@@ -111,7 +111,7 @@ public class IglooBuilder implements INBTSerializable<CompoundTag> {
             return true;
         }
         // check for unfinished snow block
-        if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS.get())) {
+        if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS_SLAB.get())) {
             return blockState.getValue(SlabBlock.TYPE) != SlabType.DOUBLE;
         }
         // check for replaceable material

@@ -6,14 +6,15 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "staywarmtogether:bloom_lantern",
-          "conditions": [
-            {
-              "condition": "minecraft:survives_explosion"
-            }
-          ]
+          "name": "staywarmtogether:bloom_lantern"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
         }
       ]
     }
   ]
 }
+

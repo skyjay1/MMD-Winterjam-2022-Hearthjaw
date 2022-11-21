@@ -6,14 +6,15 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "staywarmtogether:bloomina_bud",
-          "conditions": [
-            {
-              "condition": "minecraft:survives_explosion"
-            }
-          ]
+          "name": "staywarmtogether:bloomina_bud"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
         }
       ]
     }
   ]
 }
+

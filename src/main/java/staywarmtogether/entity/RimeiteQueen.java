@@ -173,7 +173,7 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(3, new RimeiteQueen.FindNewHomeGoal(this, 200, 10));
         this.goalSelector.addGoal(4, new RimeiteQueen.SummonRimeiteGoal(this, SUMMON_COOLDOWN));
-        this.goalSelector.addGoal(5, new RimeiteQueen.MakeBrickGoal(this));
+        this.goalSelector.addGoal(5, new RimeiteQueen.MakeBrickGoal(this, 80));
         this.goalSelector.addGoal(6, new RimeiteQueen.RimeiteQueenWanderGoal(this, 0.9D));
     }
 
@@ -187,19 +187,15 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
                 hurt(DamageSource.ON_FIRE, 1.0F);
             }
             // update igloo builder based on conditions
-            if(tickCount % 25 == 1) {
+            if((tickCount + getId()) % 45 == 0) {
                 checkAndUpdateIglooBuilder();
             }
             // periodically check if igloo is complete
-            if(hasIglooBuilder() && tickCount > 50 && random.nextInt(isIglooComplete() ? 300 : 100) == 0) {
+            if(hasIglooBuilder() && tickCount > 50 && random.nextInt(isIglooComplete() ? 350 : 200) == 0) {
                 updateIglooComplete();
             }
             // capture snow
             captureSnow();
-            // rarely destroy held brick
-            if(getHasBrick() && random.nextFloat() < (isIglooComplete() ? 0.005F : 0.0004F)) {
-                setHasBrick(false);
-            }
         }
     }
 
@@ -219,15 +215,6 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        // take snow
-        /*if(itemStack.is(Items.BUCKET) && getSnow() >= getMaxSnow()) {
-            if(!level.isClientSide()) {
-                setSnow(0);
-                itemStack.shrink(1);
-                player.getInventory().add(new ItemStack(Items.POWDER_SNOW_BUCKET));
-            }
-            return InteractionResult.SUCCESS;
-        }*/
         int snowAmount = getSnowAmountForItem(itemStack);
         // use items to fill snow
         if(snowAmount > 0 && getSnow() < getMaxSnow()) {
@@ -789,15 +776,17 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     public class MakeBrickGoal extends Goal {
 
         protected final RimeiteQueen entity;
+        protected final int chanceWhenIglooComplete;
 
-        public MakeBrickGoal(final RimeiteQueen entity) {
+        public MakeBrickGoal(final RimeiteQueen entity, final int chanceWhenIglooComplete) {
             this.entity = entity;
+            this.chanceWhenIglooComplete = Math.max(1, chanceWhenIglooComplete);
             setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
         @Override
         public boolean canUse() {
-            return entity.isIdle() && entity.hasIglooBuilder() && !entity.isIglooComplete()
+            return entity.isIdle() && entity.hasIglooBuilder() && (!entity.isIglooComplete() || entity.getRandom().nextInt(chanceWhenIglooComplete) == 0)
                     && !entity.getHasBrick() && entity.canMakeBrick();
         }
 

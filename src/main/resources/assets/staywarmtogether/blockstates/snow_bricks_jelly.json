@@ -1,0 +1,24 @@
+{
+  "variants": {
+    "facing=east,jelly_level=0": { "model": "staywarmtogether:block/snow_bricks_jelly_0", "y": 90 },
+    "facing=north,jelly_level=0": { "model": "staywarmtogether:block/snow_bricks_jelly_0" },
+    "facing=south,jelly_level=0": { "model": "staywarmtogether:block/snow_bricks_jelly_0", "y": 180 },
+    "facing=west,jelly_level=0": { "model": "staywarmtogether:block/snow_bricks_jelly_0","y": 270 },
+
+    "facing=east,jelly_level=1": { "model": "staywarmtogether:block/snow_bricks_jelly_1", "y": 90 },
+    "facing=north,jelly_level=1": { "model": "staywarmtogether:block/snow_bricks_jelly_1" },
+    "facing=south,jelly_level=1": { "model": "staywarmtogether:block/snow_bricks_jelly_1", "y": 180 },
+    "facing=west,jelly_level=1": { "model": "staywarmtogether:block/snow_bricks_jelly_1","y": 270 },
+
+    "facing=east,jelly_level=2": { "model": "staywarmtogether:block/snow_bricks_jelly_2", "y": 90 },
+    "facing=north,jelly_level=2": { "model": "staywarmtogether:block/snow_bricks_jelly_2" },
+    "facing=south,jelly_level=2": { "model": "staywarmtogether:block/snow_bricks_jelly_2", "y": 180 },
+    "facing=west,jelly_level=2": { "model": "staywarmtogether:block/snow_bricks_jelly_2","y": 270 },
+
+    "facing=east,jelly_level=3": { "model": "staywarmtogether:block/snow_bricks_jelly_3", "y": 90 },
+    "facing=north,jelly_level=3": { "model": "staywarmtogether:block/snow_bricks_jelly_3" },
+    "facing=south,jelly_level=3": { "model": "staywarmtogether:block/snow_bricks_jelly_3", "y": 180 },
+    "facing=west,jelly_level=3": { "model": "staywarmtogether:block/snow_bricks_jelly_3","y": 270 }
+    
+  }
+}

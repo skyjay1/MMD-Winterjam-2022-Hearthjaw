@@ -4,10 +4,12 @@ import staywarmtogether.block.BloominaBudBlock;
 import staywarmtogether.block.BloomLanternBlock;
 import staywarmtogether.block.HearthgoopBlock;
 import staywarmtogether.block.MovingLightBlock;
+import staywarmtogether.block.SnowBricksJellyBlock;
 import staywarmtogether.entity.Bloomina;
 import staywarmtogether.entity.Hearthjaw;
 import staywarmtogether.entity.Rimeite;
 import staywarmtogether.entity.RimeiteQueen;
+import staywarmtogether.entity.SnowBrickProjectile;
 import staywarmtogether.item.HearthgoopItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -80,7 +82,10 @@ public final class SWTRegistry {
                 new SlabBlock(BlockBehaviour.Properties.of(Material.ICE_SOLID)
                         .requiresCorrectToolForDrops()
                         .strength(1.5F, 6.0F)));
-
+        public static final RegistryObject<Block> SNOW_BRICKS_JELLY = BLOCKS.register("snow_bricks_jelly", () ->
+                new SnowBricksJellyBlock(BlockBehaviour.Properties.of(Material.ICE_SOLID)
+                        .requiresCorrectToolForDrops()
+                        .strength(1.5F, 6.0F)));
     }
 
     public static final class ItemReg {
@@ -99,8 +104,12 @@ public final class SWTRegistry {
                 new Item(new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> HEARTHGOOP = ITEMS.register("hearthgoop", () ->
                 new HearthgoopItem(BlockReg.HEARTHGOOP.get(), new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> RIMEITE_JELLY = ITEMS.register("rimeite_jelly", () ->
+                new Item(new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> SNOW_BRICKS = ITEMS.register("snow_bricks", () ->
                 new BlockItem(BlockReg.SNOW_BRICKS.get(), new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> SNOW_BRICKS_JELLY = ITEMS.register("snow_bricks_jelly", () ->
+                new BlockItem(BlockReg.SNOW_BRICKS_JELLY.get(), new Item.Properties().tab(HJ_TAB)));
     }
 
     public static final class EntityReg {
@@ -145,6 +154,13 @@ public final class SWTRegistry {
                 EntityType.Builder.of(Rimeite::new, MobCategory.CREATURE)
                         .sized(0.5F, 0.5F)
                         .build("rimeite"));
+
+        public static final RegistryObject<EntityType<? extends SnowBrickProjectile>> SNOW_BRICK = ENTITY_TYPES.register("snow_brick", () ->
+                EntityType.Builder.<SnowBrickProjectile>of(SnowBrickProjectile::new, MobCategory.MISC)
+                        .sized(0.25F, 0.25F)
+                        // TODO re-enable .noSave().noSummon()
+                        .clientTrackingRange(4).updateInterval(5)
+                        .build("snow_brick"));
     }
 
     public static final class SoundReg {

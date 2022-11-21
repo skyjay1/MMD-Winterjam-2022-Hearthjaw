@@ -595,8 +595,7 @@ public class Hearthjaw extends Animal implements NeutralMob, IAnimatable {
                     this.stop();
                     // update napping
                     entity.wantsToNap = entity.getFuel() < GOO_COST || entity.random.nextInt(5) == 1;
-                    // DEBUG
-                    SWTMain.LOGGER.debug("placed goo block, wantsToNap=" + entity.wantsToNap);
+
                     return;
                 }
             }

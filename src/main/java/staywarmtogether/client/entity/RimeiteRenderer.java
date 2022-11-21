@@ -15,6 +15,7 @@ public class RimeiteRenderer<T extends Rimeite> extends GeoEntityRenderer<T> {
 
     public RimeiteRenderer(EntityRendererProvider.Context context) {
         super(context, new RimeiteModel<>());
+        this.addLayer(new RimeiteHeldItemLayer<>(this, context.getItemInHandRenderer()));
     }
 
     public RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack,

@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "staywarmtogether:item/hearthgoop"
-  }
+  "parent": "staywarmtogether:block/hearthgoop"
 }

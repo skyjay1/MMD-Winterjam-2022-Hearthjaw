@@ -1,5 +1,6 @@
 package staywarmtogether.entity;
 
+import net.minecraft.world.level.block.SoundType;
 import staywarmtogether.SWTRegistry;
 import staywarmtogether.util.IglooBuilder;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -238,6 +239,8 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
                     player.setItemInHand(hand, itemStack.getCraftingRemainingItem());
                 }
                 itemStack.shrink(1);
+                // play sound
+                playSound(SoundType.SNOW.getPlaceSound());
             }
             return InteractionResult.SUCCESS;
         }

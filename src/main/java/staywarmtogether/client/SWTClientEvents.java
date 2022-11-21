@@ -7,6 +7,8 @@ import staywarmtogether.client.entity.RimeiteQueenRenderer;
 import staywarmtogether.client.entity.RimeiteRenderer;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import staywarmtogether.client.entity.SnowBrickModel;
+import staywarmtogether.client.entity.SnowBrickRenderer;
 
 public final class SWTClientEvents {
 
@@ -18,7 +20,7 @@ public final class SWTClientEvents {
 
         @SubscribeEvent
         public static void registerEntityLayerDefinitions(final EntityRenderersEvent.RegisterLayerDefinitions event) {
-
+            event.registerLayerDefinition(SnowBrickModel.SNOW_BRICK_LOCATION, SnowBrickModel::createLayer);
         }
 
         @SubscribeEvent
@@ -27,6 +29,7 @@ public final class SWTClientEvents {
             event.registerEntityRenderer(SWTRegistry.EntityReg.HEARTHJAW.get(), HearthjawRenderer::new);
             event.registerEntityRenderer(SWTRegistry.EntityReg.RIMEITE_QUEEN.get(), RimeiteQueenRenderer::new);
             event.registerEntityRenderer(SWTRegistry.EntityReg.RIMEITE.get(), RimeiteRenderer::new);
+            event.registerEntityRenderer(SWTRegistry.EntityReg.SNOW_BRICK.get(), SnowBrickRenderer::new);
         }
 
     }

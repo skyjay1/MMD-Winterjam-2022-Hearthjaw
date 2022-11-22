@@ -4,7 +4,7 @@ license="GNU LGPLv3"
 
 [[mods]]
     modId="staywarmtogether"
-    version="19.2.0.3"
+    version="19.2.0.4"
     displayName="Stay Warm Together"
     authors="skyjay1 and VoutVouniern"
     description='''MMD Winterjam 2022'''

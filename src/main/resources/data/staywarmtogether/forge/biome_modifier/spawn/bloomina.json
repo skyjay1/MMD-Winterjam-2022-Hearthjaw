@@ -1,0 +1,11 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#staywarmtogether:has_spawn/bloomina",
+  "spawners":
+  {
+    "type": "staywarmtogether:bloomina",
+    "weight": 6,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

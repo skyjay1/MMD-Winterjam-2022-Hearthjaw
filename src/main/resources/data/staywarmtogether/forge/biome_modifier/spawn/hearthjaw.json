@@ -1,0 +1,11 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#staywarmtogether:has_spawn/hearthjaw",
+  "spawners":
+  {
+    "type": "staywarmtogether:hearthjaw",
+    "weight": 10,
+    "minCount": 3,
+    "maxCount": 4
+  }
+}

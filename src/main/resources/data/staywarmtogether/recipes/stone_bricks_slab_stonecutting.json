@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "staywarmtogether:snow_bricks"
+  },
+  "result": "staywarmtogether:snow_bricks_slab",
+  "count": 2
+}

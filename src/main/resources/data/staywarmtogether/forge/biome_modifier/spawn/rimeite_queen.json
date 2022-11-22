@@ -1,0 +1,11 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#staywarmtogether:has_spawn/rimeite_queen",
+  "spawners":
+  {
+    "type": "staywarmtogether:rimeite",
+    "weight": 5,
+    "minCount": 1,
+    "maxCount": 1
+  }
+}

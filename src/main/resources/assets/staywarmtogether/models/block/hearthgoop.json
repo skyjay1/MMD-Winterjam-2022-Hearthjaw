@@ -5,6 +5,7 @@
 		"1": "staywarmtogether:block/hearthgoop_splat",
 		"particle": "#1"
 	},
+	"render_type": "cutout",
 	"elements": [
 		{
 			"from": [0, 0.01, 0],

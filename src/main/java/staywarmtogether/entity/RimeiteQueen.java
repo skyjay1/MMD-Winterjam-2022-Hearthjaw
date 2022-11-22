@@ -1,5 +1,6 @@
 package staywarmtogether.entity;
 
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.SoundType;
 import staywarmtogether.SWTRegistry;
 import staywarmtogether.util.IglooBuilder;
@@ -204,6 +205,19 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
         super.tick();
         // update brick timer
         if(brickTimer > 0) {
+            // play sounds
+            if(isBricking()) {
+                if(brickTimer == BRICK_TIME - 1) {
+                    playSound(getSnowDrainSound(), getSoundVolume() * 0.09F, 1.0F);
+                }
+                if(brickTimer == 8) {
+                    playSound(getBrickPopSound(), getSoundVolume() - 0.1F, 1.0F);
+                }
+                if(brickTimer == 1) {
+                    playSound(getBrickFallSound(), getSoundVolume(), 1.0F);
+                }
+            }
+            // update state
             if(--brickTimer <= 0 && !level.isClientSide()) {
                 setState(STATE_IDLE);
             }
@@ -551,6 +565,32 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
     @Override
     public AnimationFactory getFactory() {
         return factory;
+    }
+
+    //// SOUNDS ////
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SWTRegistry.SoundReg.RIMEITE_HURT.get();
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SWTRegistry.SoundReg.RIMEITE_DEATH.get();
+    }
+
+    protected SoundEvent getSnowDrainSound() {
+        return SWTRegistry.SoundReg.RIMEITE_QUEEN_DRAIN_SNOW.get();
+    }
+
+    protected SoundEvent getBrickPopSound() {
+        return SWTRegistry.SoundReg.RIMEITE_QUEEN_SNOW_BRICK_POP.get();
+    }
+
+    protected SoundEvent getBrickFallSound() {
+        return SWTRegistry.SoundReg.RIMEITE_CATCH_BRICK.get();
     }
 
     //// NBT ////

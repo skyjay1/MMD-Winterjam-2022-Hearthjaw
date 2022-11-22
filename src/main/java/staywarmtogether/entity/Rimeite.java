@@ -4,6 +4,7 @@ import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -220,6 +221,15 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
         super.tick();
         // update animations
         if(animationTimer > 0) {
+            // play sounds
+            if(isScooping()) {
+                if(animationTimer == SCOOP_TIME - 1) {
+                    playSound(getScoopSound(), getSoundVolume() - 0.5F, getVoicePitch());
+                }
+                if(animationTimer == 1) {
+                    playSound(getCatchBrickSound(), getSoundVolume() - 0.1F, getVoicePitch());
+                }
+            }
             if(--animationTimer <= 0 && !level.isClientSide()) {
                 // throw brick at end of animation
                 if(isThrowing() && getTarget() != null && getHasBrick()) {
@@ -361,9 +371,10 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
         double dz = target.getZ() - this.getZ();
         double distance = Math.sqrt(dx * dx + dz * dz);
         // calculate motion
-        brick.shoot(dx, dy + distance * brick.getGravity(), dz, 0.8F, 2);
+        float speed = 0.86F;
+        brick.shoot(dx, dy + distance * brick.getGravity() * (1.0D / speed), dz, speed, 2);
         // play sound
-        // TODO this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        playSound(SoundEvents.SNOWBALL_THROW, getSoundVolume(), getVoicePitch() - 0.32F);
         // add entity
         this.level.addFreshEntity(brick);
         // remove brick
@@ -563,6 +574,39 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
 
     public boolean wantsToForgetQueen() {
         return tickCount - sawQueenTimestamp > MAX_SAW_QUEEN_TIME + ((getId() * 3) % 1200);
+    }
+
+    //// SOUNDS ////
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SWTRegistry.SoundReg.RIMEITE_HURT.get();
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SWTRegistry.SoundReg.RIMEITE_DEATH.get();
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return getRandom().nextInt(3) > 0 ? null : SWTRegistry.SoundReg.RIMEITE_AMBIENT.get();
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        return 320;
+    }
+
+    protected SoundEvent getScoopSound() {
+        return SWTRegistry.SoundReg.RIMEITE_SCOOP.get();
+    }
+
+    protected SoundEvent getCatchBrickSound() {
+        return SWTRegistry.SoundReg.RIMEITE_CATCH_BRICK.get();
     }
 
     //// NBT ////
@@ -1268,14 +1312,17 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
             }
             BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
             double distSq = blockPos.distSqr(center);
+            Direction closestDir = null;
             // determine the direction toward the center of the igloo
             for(Direction direction : Direction.Plane.HORIZONTAL) {
                 mutableBlockPos.setWithOffset(blockPos, direction);
-                if(mutableBlockPos.distSqr(center) < distSq) {
-                    return Optional.of(direction);
+                double d = mutableBlockPos.distSqr(center);
+                if(d < distSq) {
+                    closestDir = direction;
+                    distSq = d;
                 }
             }
-            return Optional.empty();
+            return Optional.ofNullable(closestDir);
         }
     }
 }

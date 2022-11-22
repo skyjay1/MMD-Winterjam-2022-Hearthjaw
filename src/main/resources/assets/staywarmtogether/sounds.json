@@ -35,5 +35,37 @@
       "staywarmtogether:432194__surfaceknight68__single-monster-grunt"
     ],
     "subtitle": "subtitles.entity.staywarmtogether.hearthjaw.hurt"
+  },
+  "entity.rimeite.scoop": {
+    "sounds": [
+      "staywarmtogether:595105__allen2001__digging-with-shovel-owi-region-0",
+      "staywarmtogether:595105__allen2001__digging-with-shovel-owi-region-1",
+      "staywarmtogether:595105__allen2001__digging-with-shovel-owi-region-2"
+    ],
+    "subtitle": "subtitles.entity.staywarmtogether.rimeite.scoop"
+  },
+  "entity.rimeite.ambient": {
+    "sounds": [ "staywarmtogether:414745__jeffnevington__creaturetalk-1" ],
+    "subtitle": "subtitles.entity.staywarmtogether.rimeite.ambient"
+  },
+  "entity.rimeite.hurt": {
+    "sounds": [ "staywarmtogether:343711__simenfo1__nasty-splat-sound-region-0" ],
+    "subtitle": "subtitles.entity.staywarmtogether.rimeite.hurt"
+  },
+  "entity.rimeite.death": {
+    "sounds": [ "staywarmtogether:343711__simenfo1__nasty-splat-sound" ],
+    "subtitle": "subtitles.entity.staywarmtogether.rimeite.death"
+  },
+  "entity.rimeite.catch_brick": {
+    "sounds": [ "staywarmtogether:581615__acv23__hit-hurt-13" ],
+    "subtitle": "subtitles.entity.staywarmtogether.rimeite.catch_brick"
+  },
+  "entity.rimeite_queen.drain_snow": {
+    "sounds": [ "staywarmtogether:467301__xfixy8__sand-slidding-out-of-shovel-slowly" ],
+    "subtitle": "subtitles.entity.staywarmtogether.rimeite_queen.drain_snow"
+  },
+  "entity.rimeite_queen.snow_brick_pop": {
+    "sounds": [ "staywarmtogether:553520__newlocknew__pop-down-impact-1-3-select-4lrs-mltprcssng" ],
+    "subtitle": "subtitles.entity.staywarmtogether.rimeite_queen.snow_brick_pop"
   }
 }

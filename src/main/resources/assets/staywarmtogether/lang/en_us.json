@@ -19,7 +19,15 @@
   "subtitles.entity.staywarmtogether.bloomina.ambient": "Bloomina chirps",
   "subtitles.entity.staywarmtogether.bloomina.burp": "Bloomina burps",
   "subtitles.entity.staywarmtogether.bloomina.hurt": "Bloomina hurts",
+  "subtitles.entity.staywarmtogether.bloomina.scared": "Bloomina scared",
   "subtitles.entity.staywarmtogether.hearthjaw.ambient": "Hearthjaw grunts",
   "subtitles.entity.staywarmtogether.hearthjaw.breathe": "Hearthjaw breathes",
-  "subtitles.entity.staywarmtogether.hearthjaw.hurt": "Hearthjaw hurts"
+  "subtitles.entity.staywarmtogether.hearthjaw.hurt": "Hearthjaw hurts",
+  "subtitles.entity.staywarmtogether.rimeite.ambient": "Rimeite chatters",
+  "subtitles.entity.staywarmtogether.rimeite.hurt": "Rimeite hurts",
+  "subtitles.entity.staywarmtogether.rimeite.scoop": "Rimeite scoops brick",
+  "subtitles.entity.staywarmtogether.rimeite.catch_brick": "Brick lands",
+  "subtitles.entity.staywarmtogether.rimeite.death": "Rimeite dies",
+  "subtitles.entity.staywarmtogether.rimeite_queen.drain_snow": "Rimeite Queen drains snow",
+  "subtitles.entity.staywarmtogether.rimeite_queen.snow_brick_pop": "Brick pops"
 }

@@ -186,5 +186,12 @@ public final class SWTRegistry {
         public static final RegistryObject<SoundEvent> HEARTHJAW_AMBIENT = register("entity.hearthjaw.ambient");
         public static final RegistryObject<SoundEvent> HEARTHJAW_BREATHE = register("entity.hearthjaw.breathe");
         public static final RegistryObject<SoundEvent> HEARTHJAW_HURT = register("entity.hearthjaw.hurt");
+        public static final RegistryObject<SoundEvent> RIMEITE_AMBIENT = register("entity.rimeite.ambient");
+        public static final RegistryObject<SoundEvent> RIMEITE_HURT = register("entity.rimeite.hurt");
+        public static final RegistryObject<SoundEvent> RIMEITE_DEATH = register("entity.rimeite.death");
+        public static final RegistryObject<SoundEvent> RIMEITE_SCOOP = register("entity.rimeite.scoop");
+        public static final RegistryObject<SoundEvent> RIMEITE_CATCH_BRICK = register("entity.rimeite.catch_brick");
+        public static final RegistryObject<SoundEvent> RIMEITE_QUEEN_DRAIN_SNOW = register("entity.rimeite_queen.drain_snow");
+        public static final RegistryObject<SoundEvent> RIMEITE_QUEEN_SNOW_BRICK_POP = register("entity.rimeite_queen.snow_brick_pop");
     }
 }

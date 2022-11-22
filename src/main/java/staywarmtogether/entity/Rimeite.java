@@ -14,6 +14,7 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -892,7 +893,8 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
 
         @Override
         protected boolean canUse(@NotNull RimeiteQueen queen) {
-            return entity.getMainHandItem().is(Items.SNOWBALL);
+            ItemStack heldItem = entity.getMainHandItem();
+            return !heldItem.isEmpty() && queen.getSnowAmountForItem(heldItem) > 0;
         }
 
         @Override
@@ -902,8 +904,10 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
             int snowAmount = queen.getSnowAmountForItem(heldItem);
             // add snow and remove item
             queen.addSnow(snowAmount);
+            if(heldItem.getCount() == 1) {
+                entity.setItemInHand(InteractionHand.MAIN_HAND, heldItem.getCraftingRemainingItem());
+            }
             heldItem.shrink(1);
-            entity.setItemInHand(InteractionHand.MAIN_HAND, heldItem);
             // play sound
             entity.playSound(SoundType.SNOW.getPlaceSound());
             return true;
@@ -955,7 +959,7 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
 
         @Override
         public boolean canContinueToUse() {
-            return queen != null && entity.getMainHandItem().isEmpty() && !entity.getHasBrick() && super.canContinueToUse();
+            return queen != null && entity.getMainHandItem().isEmpty() && !entity.getHasBrick() && !entity.wantsToSeeQueen() && super.canContinueToUse();
         }
 
         @Override
@@ -1016,7 +1020,7 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
 
         @Override
         public boolean canContinueToUse() {
-            return entity.isIdle() && entity.getBuildTarget().isPresent() && super.canContinueToUse();
+            return entity.isIdle() && !entity.wantsToSeeQueen() && entity.getBuildTarget().isPresent() && super.canContinueToUse();
         }
 
         @Override
@@ -1028,6 +1032,8 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
         @Override
         public void tick() {
             if(isReachedTarget()) {
+                // stop moving
+                entity.getNavigation().stop();
                 // ensure there are no entity collisions here
                 List<Entity> list = entity.level.getEntitiesOfClass(Entity.class, new AABB(blockPos).deflate(0.125D));
                 if(list.isEmpty()) {
@@ -1191,7 +1197,7 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
 
         @Override
         public boolean canContinueToUse() {
-            return queen != null && entity.isIdle() && entity.getHasBrick() && this.direction != null && super.canContinueToUse();
+            return queen != null && entity.isIdle() && entity.getHasBrick() && !entity.wantsToSeeQueen() && this.direction != null && super.canContinueToUse();
         }
 
         @Override
@@ -1273,26 +1279,31 @@ public class Rimeite extends PathfinderMob implements RangedAttackMob, IAnimatab
                         return false;
                     }
                 }
+                // block can be replaced, check for ground level
+                // determine the direction towards the center
+                Optional<Direction> oDirection = getDirectionToCenter(blockPos, queen.getIglooBuilder().getCenter());
+                if(oDirection.isEmpty()) {
+                    return false;
+                }
+                // determine the pathfinding block
+                BlockPos pathTo = blockPos.relative(oDirection.get()).below();
+                if(!level.getBlockState(pathTo).isFaceSturdy(level, pathTo, Direction.UP)) {
+                    return false;
+                }
+                // all checks passed
+                this.direction = oDirection.get();
+                return true;
             } else if(blockState.is(SWTRegistry.BlockReg.SNOW_BRICKS_JELLY.get())) {
                 // check for filled jelly
                 if(blockState.getValue(SnowBricksJellyBlock.JELLY_LEVEL) >= SnowBricksJellyBlock.MAX_JELLY) {
                     return false;
                 }
+                // update direction
+                this.direction = blockState.getValue(SnowBricksJellyBlock.FACING);
+                return true;
             }
-            // block can be replaced, check for ground level
-            // determine the direction towards the center
-            Optional<Direction> oDirection = getDirectionToCenter(blockPos, queen.getIglooBuilder().getCenter());
-            if(oDirection.isEmpty()) {
-                return false;
-            }
-            // determine the pathfinding block
-            BlockPos pathTo = blockPos.relative(oDirection.get()).below();
-            if(!level.getBlockState(pathTo).isFaceSturdy(level, pathTo, Direction.UP)) {
-                return false;
-            }
-            // all checks passed
-            this.direction = oDirection.get();
-            return true;
+            // no checks passed
+            return false;
         }
 
         @Override

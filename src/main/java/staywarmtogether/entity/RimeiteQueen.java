@@ -394,11 +394,17 @@ public class RimeiteQueen extends PathfinderMob implements IAnimatable {
      * @return the amount of snow to add when consuming this itemstack
      */
     public int getSnowAmountForItem(final ItemStack itemStack) {
+        // do not process empty items
+        if(itemStack.isEmpty()) {
+            return 0;
+        }
+        // return first match
         for(Map.Entry<ItemPredicate, Integer> entry : SNOW_FUEL_SET.entrySet()) {
             if(entry.getKey().matches(itemStack)) {
                 return entry.getValue();
             }
         }
+        // fallback amount
         return 0;
     }
 

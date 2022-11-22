@@ -1,5 +1,6 @@
 package staywarmtogether;
 
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import staywarmtogether.block.BloominaBudBlock;
 import staywarmtogether.block.BloomLanternBlock;
 import staywarmtogether.block.HearthgoopBlock;
@@ -98,24 +99,35 @@ public final class SWTRegistry {
             ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         }
 
+        // SPAWN EGGS //
+        public static final RegistryObject<Item> BLOOMINA_SPAWN_EGG = ITEMS.register("bloomina_spawn_egg", () ->
+                new ForgeSpawnEggItem(EntityReg.BLOOMINA, 0x302513, 0x6bd424, new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> HEARTHJAW_SPAWN_EGG = ITEMS.register("hearthjaw_spawn_egg", () ->
+                new ForgeSpawnEggItem(EntityReg.HEARTHJAW, 0x333f6a, 0x8f201a, new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> RIMEITE_QUEEN_SPAWN_EGG = ITEMS.register("rimeite_queen_spawn_egg", () ->
+                new ForgeSpawnEggItem(EntityReg.RIMEITE_QUEEN, 0x6b9dfb, 0xf4fcfc, new Item.Properties().tab(HJ_TAB)));
+
+        // BLOCK ITEMS //
         public static final RegistryObject<Item> BLOOMINA_BUD = ITEMS.register("bloomina_bud", () ->
                 new BlockItem(BlockReg.BLOOMINA_BUD.get(), new Item.Properties().tab(HJ_TAB)));
-        public static final RegistryObject<Item> BLOOMLIGHT = ITEMS.register("bloomlight", () ->
-                new Item(new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> BLOOM_LANTERN = ITEMS.register("bloom_lantern", () ->
                 new BlockItem(BlockReg.BLOOM_LANTERN.get(), new Item.Properties().tab(HJ_TAB)));
-        public static final RegistryObject<Item> BLOOMLIGHT_ON_A_STICK = ITEMS.register("bloomlight_on_a_stick", () ->
-                new Item(new Item.Properties().tab(HJ_TAB)));
-        public static final RegistryObject<Item> HEARTHGOOP = ITEMS.register("hearthgoop", () ->
-                new HearthgoopItem(BlockReg.HEARTHGOOP.get(), new Item.Properties().tab(HJ_TAB)));
-        public static final RegistryObject<Item> RIMEITE_JELLY = ITEMS.register("rimeite_jelly", () ->
-                new Item(new Item.Properties().tab(HJ_TAB).stacksTo(16)));
         public static final RegistryObject<Item> SNOW_BRICKS = ITEMS.register("snow_bricks", () ->
                 new BlockItem(BlockReg.SNOW_BRICKS.get(), new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> SNOW_BRICKS_SLAB = ITEMS.register("snow_bricks_slab", () ->
                 new BlockItem(BlockReg.SNOW_BRICKS_SLAB.get(), new Item.Properties().tab(HJ_TAB)));
         public static final RegistryObject<Item> SNOW_BRICKS_JELLY = ITEMS.register("snow_bricks_jelly", () ->
                 new BlockItem(BlockReg.SNOW_BRICKS_JELLY.get(), new Item.Properties().tab(HJ_TAB)));
+
+        // ITEMS //
+        public static final RegistryObject<Item> BLOOMLIGHT = ITEMS.register("bloomlight", () ->
+                new Item(new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> BLOOMLIGHT_ON_A_STICK = ITEMS.register("bloomlight_on_a_stick", () ->
+                new Item(new Item.Properties().tab(HJ_TAB).stacksTo(1)));
+        public static final RegistryObject<Item> HEARTHGOOP = ITEMS.register("hearthgoop", () ->
+                new HearthgoopItem(BlockReg.HEARTHGOOP.get(), new Item.Properties().tab(HJ_TAB)));
+        public static final RegistryObject<Item> RIMEITE_JELLY = ITEMS.register("rimeite_jelly", () ->
+                new Item(new Item.Properties().tab(HJ_TAB).stacksTo(16)));
     }
 
     public static final class EntityReg {
